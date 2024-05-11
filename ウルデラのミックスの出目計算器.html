@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>ミックスの出目計算機 星のカービィウルトラスーパーデラックス</title>
+</head>
+<body>
+	<script>
+		enemies = ['カッター', 'ビーム', 'ヨーヨー', 'ニンジャ', 'ウィング', 'ファイター', 'ジェット', 'ソード', 'ファイア', 'ストーン', 'ボム', 'プラズマ', 'ホイール', 'アイス', 'ミラー', 'コピー', 'スープレックス', 'ハンマー', 'パラソル', 'マイク', 'スリープ', 'ペイント', 'コック', 'クラッシュ']
+		abilities = ['ヨーヨー', 'ニンジャ', 'ソード', 'ウィング', 'ホイール', 'ジェット', 'いてっ！', 'ビーム', 'スープレックス', 'スリープ', 'クラッシュ', 'ストーン', 'プラズマ', 'パラソル', 'アイス', 'ミラー', 'ハンマー', 'コック', 'ファイター', 'コピー', 'むてきキャンディ', 'ボム', 'ファイア', 'カッター', 'マイク']
+		first = document.createElement('select')
+		for(let enemy of enemies){
+			let child = document.createElement('option')
+			child.label = enemy
+			first.appendChild(child)
+		}
+		second = first.cloneNode(true)
+		roulette = document.createElement('ol')
+		for(let i=0; i < 26; i++){
+			roulette.appendChild(document.createElement('li'))
+		}
+		document.body.appendChild(first)
+		document.body.appendChild(second)
+		document.body.appendChild(roulette)
+		function display(){
+			let start = first.selectedIndex + second.selectedIndex
+			for(let i=0; i < 25; i++){
+				roulette.children[i].innerText = abilities[(start + i) % 25]
+			}
+			roulette.lastChild.innerText = abilities[(start + 1) * 2 % 25]
+			roulette.lastChild.value = start % 25 + 78
+		}
+		display()
+		first.onchange = display
+		second.onchange = display
+	</script>
+</body>
+</html>
