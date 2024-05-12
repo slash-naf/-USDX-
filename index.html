@@ -28,7 +28,7 @@
 				roulette.children[i].innerText = abilities[(start + i) % 25]
 			}
 			roulette.lastChild.innerText = abilities[(start + 1) * 2 % 25]
-			roulette.lastChild.value = start % 25 + 78
+			roulette.lastChild.value = (start + 1) % 25 + 77
 		}
 		display()
 		first.onchange = display
