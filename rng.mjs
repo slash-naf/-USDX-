@@ -144,4 +144,4 @@ const HeavyLobster = {
 	}
 }
 
-export {Corkboard, HeavyLobster, Star, rngAt, randiAt};
+export {Star, Corkboard, HeavyLobster, rngAt, randi, randiAt};
