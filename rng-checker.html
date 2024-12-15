@@ -26,9 +26,9 @@
 			</table>
 		</li>
 	</ul><table class="output">
-		<tr><th>最初<td>
-		<tr><th>走ったら<td>
-		<tr><th>歩いたら<td>
+		<tr><th>戦うまでに<td class="toDashAndJumpAdvance">
+		<tr><th>走ったら<td class="postDashAdvance">
+		<tr><th>歩いたら<td class="postWalkAdvance">
 	</table></li></ul>
 	<script type="module">
 
@@ -64,11 +64,18 @@
 		});
 
 		HeavyLobster.input = document.querySelector('#heavy-lobster .input input');
-		//HeavyLobster.output = document.querySelector('#heavy-lobster .output');
+		HeavyLobster.output = {
+			toDashAndJumpAdvance: document.querySelector('#heavy-lobster .output .toDashAndJumpAdvance'),
+			postDashAdvance: document.querySelector('#heavy-lobster .output .postDashAdvance'),
+			postWalkAdvance: document.querySelector('#heavy-lobster .output .postWalkAdvance'),
+		};
 		HeavyLobster.input.oninput = _=>{
+			let out = HeavyLobster.output;
 			let pattern = HeavyLobster.input.value;
 			if(pattern.length < 5){
-//				HeavyLobster.output.textContent = '';
+				out.toDashAndJumpAdvance.textContent = '';
+				out.postDashAdvance.textContent = '';
+				out.postWalkAdvance.textContent = '';
 				return;
 			}
 			pattern = charsToPattern(pattern);
@@ -76,9 +83,9 @@
 			let searchRslt = HeavyLobster.search(pattern);
 			let calcRslt = HeavyLobster.calc(searchRslt);
 
-			console.log(searchRslt)
-			console.log(calcRslt)
-
+			out.toDashAndJumpAdvance.textContent = calcRslt.toDashAndJumpAdvance;
+			out.postDashAdvance.textContent = calcRslt.postDashAdvance;
+			out.postWalkAdvance.textContent = calcRslt.postWalkAdvance;
 		}
 		document.querySelectorAll('#heavy-lobster .input button').forEach(el =>{
 			const c = numToChar(Star.names.indexOf(el.textContent));
