@@ -60,7 +60,7 @@ const HeavyLobster = {
 					}
 				}
 				if(b && match(2, 129) && match(4, 181)){
-					add(ofs-2 & 0xFFF, 2);
+					add(ofs+2 & 0xFFF, 2);
 					add(ofs | 0x2000, 2);
 					add(ofs, 1);
 				}
