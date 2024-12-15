@@ -71,9 +71,9 @@ const HeavyLobster = {
 		for(const [ofs, cnt] of map.entries()){
 			let n = ofs >> 12;
 			rslt.push({
-				dash_or_walk: (ofs + 555 + n) & 0xFFF,
-				after_dash: (ofs + 584) & 0xFFF,
-				after_walk: (ofs + 598 + n) & 0xFFF,
+				dashOrWalkIdx: (ofs + 555 + n) & 0xFFF,
+				postDashIdx: (ofs + 584) & 0xFFF,
+				postWalkIdx: (ofs + 598 + n) & 0xFFF,
 				cnt: cnt
 			});
 		}
@@ -81,52 +81,52 @@ const HeavyLobster = {
 		return rslt;
 	},
 	calc(candidates){
-		let bestCnt = 0;
-		let bestStep = 0;
-		let bestStep2 = 0;
-		for(let step2=0; step2 <= 7; step2++){
-			for(let step=0; step < 40; step++){
+		let dashAndJumpCnt = 0;
+		let toDashAndJumpAdvance = 0;
+		let postDashAdvance = 0;
+		for(let advance2=0; advance2 <= 7; advance2++){
+			for(let advance1=0; advance1 < 40; advance1++){
 				let cnt = 0;
 				for(let x of candidates){
 					if(
-						randiAt(x.after_dash + step + step2, 4) == 0 && 
-						randiAt(x.dash_or_walk + step, 4) != 0
+						randiAt(x.postDashIdx + advance1 + advance2, 4) == 0 && 
+						randiAt(x.dashOrWalkIdx + advance1, 4) != 0
 					){
 						cnt += x.cnt
 					}
 				}
-				if(cnt > bestCnt){
-					bestCnt = cnt;
-					bestStep = step;
-					bestStep2 = step2;
+				if(cnt > dashAndJumpCnt){
+					dashAndJumpCnt = cnt;
+					toDashAndJumpAdvance = advance1;
+					postDashAdvance = advance2;
 				}
 			}
 		}
 
-		candidates = candidates.filter(x => randiAt(x.dash_or_walk + bestStep) == 0);
-		let bestCnt2 = 0;
-		let bestStep3 = 0; //歩いた場合に進める数
-		for(let step3=0; step3 <= 7; step3++){
+		candidates = candidates.filter(x => randiAt(x.dashOrWalkIdx + toDashAndJumpAdvance) == 0);
+		let walkAndJumpCnt = 0;
+		let postWalkAdvance = 0;
+		for(let advance=0; advance <= 7; advance++){
 			let cnt = 0;
 			for(let x of candidates){
 				if(
-					randiAt(x.after_walk + bestStep + step3, 4) == 0
+					randiAt(x.postWalkIdx + toDashAndJumpAdvance + advance, 4) == 0
 				){
 					cnt += x.cnt
 				}
 			}
-			if(cnt > bestCnt2){
-				bestCnt2 = cnt;
-				bestStep3 = step3;
+			if(cnt > walkAndJumpCnt){
+				walkAndJumpCnt = cnt;
+				postWalkAdvance = advance;
 			}
 		}
 
 		return {
-			dash_or_walk: bestStep,
-			after_dash: bestStep2,
-			after_walk: bestStep3,
-			dash_and_jump: bestCnt,
-			walk_and_jump: bestCnt2,
+			toDashAndJumpAdvance: toDashAndJumpAdvance,
+			postDashAdvance: postDashAdvance,
+			postWalkAdvance: postWalkAdvance,
+			dashAndJumpCnt: dashAndJumpCnt,
+			walkAndJumpCnt: walkAndJumpCnt,
 		};
 	}
 }
