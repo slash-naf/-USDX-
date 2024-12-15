@@ -72,13 +72,28 @@
 		HeavyLobster.input.oninput = _=>{
 			let out = HeavyLobster.output;
 			let pattern = HeavyLobster.input.value;
+			HeavyLobster.input.value = pattern.replace(/[1-9]/g, m =>{
+				const arrowMap = {
+					8: "↑",
+					9: "↗",
+					6: "→",
+					3: "↘",
+					2: "↓",
+					1: "↙",
+					4: "←",
+					7: "↖",
+					5: "?"
+				};
+				return arrowMap[m];
+			});
+
 			if(pattern.length < 5){
 				out.toDashAndJumpAdvance.textContent = '';
 				out.postDashAdvance.textContent = '';
 				out.postWalkAdvance.textContent = '';
 				return;
 			}
-			pattern = charsToPattern(pattern);
+			pattern = pattern.split('').map(x => Star.names.indexOf(x));
 
 			let searchRslt = HeavyLobster.search(pattern);
 			let calcRslt = HeavyLobster.calc(searchRslt);
@@ -88,9 +103,8 @@
 			out.postWalkAdvance.textContent = calcRslt.postWalkAdvance;
 		}
 		document.querySelectorAll('#heavy-lobster .input button').forEach(el =>{
-			const c = numToChar(Star.names.indexOf(el.textContent));
 			el.onclick = _=>{
-				HeavyLobster.input.value += c;
+				HeavyLobster.input.value += el.textContent;
 				HeavyLobster.input.oninput();
 			}
 		});
