@@ -68,6 +68,7 @@ const HeavyLobster = {
 		}
 
 		let rslt = [];
+		rslt.cntSum = 0;
 		for(const [ofs, cnt] of map.entries()){
 			let n = ofs >> 12;
 			rslt.push({
@@ -76,6 +77,7 @@ const HeavyLobster = {
 				postWalkIdx: (ofs + 598 + n) & 0xFFF,
 				cnt: cnt
 			});
+			rslt.cntSum += cnt;
 		}
 
 		return rslt;
@@ -103,7 +105,15 @@ const HeavyLobster = {
 			}
 		}
 
-		candidates = candidates.filter(x => randiAt(x.dashOrWalkIdx + toDashAndJumpAdvance) == 0);
+		let walkCnt = 0;
+		candidates = candidates.filter(x =>{
+			if(randiAt(x.dashOrWalkIdx + toDashAndJumpAdvance, 4) == 0){
+				walkCnt += x.cnt;
+				return true;
+			}
+			return false;
+		});
+
 		let walkAndJumpCnt = 0;
 		let postWalkAdvance = 0;
 		for(let advance=0; advance <= 7; advance++){
@@ -127,6 +137,7 @@ const HeavyLobster = {
 			postWalkAdvance: postWalkAdvance,
 			dashAndJumpCnt: dashAndJumpCnt,
 			walkAndJumpCnt: walkAndJumpCnt,
+			walkCnt: walkCnt,
 		};
 	}
 }
