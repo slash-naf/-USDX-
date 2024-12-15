@@ -2,60 +2,91 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>乱数確認器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>乱数調整 - 星のカービィ ウルトラスーパーデラックス</title>
+	<link rel="stylesheet" href="style.css">
 </head>
 <body>
-	<button onclick="narrowdown(1)">コルクボート</button>
-	<button onclick="narrowdown(0)">裏コルクボート</button>
-	<button onclick="reset()">リセット</button>
-	<p>4096/4096</p>
-	<script>
-		
-		var candidates = new Array(4096).fill(true);
-		var offsetSeed = 0;
-		var output = document.getElementsByTagName('p')[0];
+	<ul><li id="corkboard">コルクボードの曲から乱数を特定する<ul>
+		<li class="input">
+			<button>コルクボード</button>
+			<button>裏コルクボード</button>
+			<button>?</button>
+			<input type="search">
+		</li>
+		<li class="output"></li>
+	</ul></li>
+	<li id="heavy-lobster">ヘビーロブスターの乱数調整<ul>
+		<li class="input">
+			<input type="search">
+			<table>
+				<tr><td><button>↖</button><td><button>↑</button><td><button>↗</button>
+				<tr><td><button>←</button><td><button>?</button><td><button>→</button>
+				<tr><td><button>↙</button><td><button>↓</button><td><button>↘</button>
+			</table>
+		</li>
+	</ul><table class="output">
+		<tr><th>最初<td>
+		<tr><th>走ったら<td>
+		<tr><th>歩いたら<td>
+	</table></li></ul>
+	<script type="module">
 
-		function nextSeed(seed){
-			return (seed * 61 + 1401) & 4095;
-		}
-		function randi(seed, max){
-			return seed * max >> 12;
-		}
+		import {Corkboard, HeavyLobster, Star, rngAt, randiAt} from './rng.mjs';
 
-		function reset(){
-			for(let i=0; i < candidates.length; i++){
-				candidates[i] = true;
+		const numToChar = n => n < 0 ? '?' : n.toString(36);
+		const charsToPattern = s => s.split('').map(c =>{
+			let n = parseInt(c, 36);
+			return isNaN(n) ? -1 : n;
+		});
+
+		Corkboard.input = document.querySelector('#corkboard .input input');
+		Corkboard.output = document.querySelector('#corkboard .output');
+		Corkboard.input.oninput = _=>{
+			let pattern = Corkboard.input.value;
+			if(pattern.length < 8){
+				Corkboard.output.textContent = '';
+				return;		
 			}
-			offsetSeed = 0;
-			output.innerText = "4096/4096";
-		}
-		function narrowdown(rn){
-
-			let candidatesCount = 0;
-			let candidate = 0;
-			
-			let seed = offsetSeed;
-			for(let i=0; i < candidates.length; i++){
-				if(candidates[i]){
-
-					candidates[i] = randi(seed, 2) == rn;
-
-					if(candidates[i]){
-						candidatesCount++;
-						candidate = seed;
-					}
-
-				}
-				seed = nextSeed(seed);
+			pattern = charsToPattern(pattern);
+			let rslt = Corkboard.search(pattern);
+			Corkboard.output.textContent = rslt.map(n =>{
+				n += pattern.length * 2 - 2;
+				return '#'+ n +': '+ rngAt(n);
+			}).join(', ');
+		} 
+		document.querySelectorAll('#corkboard .input button').forEach(el =>{
+			const c = numToChar(Corkboard.names.indexOf(el.textContent));
+			el.onclick = _=>{
+				Corkboard.input.value += c;
+				Corkboard.input.oninput();
 			}
-			offsetSeed = nextSeed(nextSeed(offsetSeed));
+		});
 
-			if(candidatesCount == 1){
-				output.innerText = candidate.toString();
-			}else{
-				output.innerText = candidatesCount + "/4096";
+		HeavyLobster.input = document.querySelector('#heavy-lobster .input input');
+		//HeavyLobster.output = document.querySelector('#heavy-lobster .output');
+		HeavyLobster.input.oninput = _=>{
+			let pattern = HeavyLobster.input.value;
+			if(pattern.length < 5){
+//				HeavyLobster.output.textContent = '';
+				return;
 			}
+			pattern = charsToPattern(pattern);
+
+			let searchRslt = HeavyLobster.search(pattern);
+			let calcRslt = HeavyLobster.calc(searchRslt);
+
+			console.log(searchRslt)
+			console.log(calcRslt)
+
 		}
+		document.querySelectorAll('#heavy-lobster .input button').forEach(el =>{
+			const c = numToChar(Star.names.indexOf(el.textContent));
+			el.onclick = _=>{
+				HeavyLobster.input.value += c;
+				HeavyLobster.input.oninput();
+			}
+		});
 
 	</script>
 </body>
