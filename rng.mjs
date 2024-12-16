@@ -37,8 +37,9 @@ const Corkboard = {
 
 //ヘビーロブスター戦で星の向きから乱数を予測し、乱数をいくつ手動で進めれば目的の乱数を引けるか計算
 const HeavyLobster = {
-	advanceMax1: 40,
-	advanceMax2: 7,
+	toDashAndJumpAdvanceMax: 40,
+	postDashAdvanceMax: 7,
+	postWalkAdvanceMax: 11,
 	search(pattern){
 		let ofs = 0;
 
@@ -88,8 +89,8 @@ const HeavyLobster = {
 		let dashAndJumpCnt = 0;
 		let toDashAndJumpAdvance = 0;
 		let postDashAdvance = 0;
-		for(let advance2=0; advance2 <= this.advanceMax2; advance2++){
-			for(let advance1=0; advance1 <= this.advanceMax1; advance1++){
+		for(let advance2=0; advance2 <= this.postDashAdvanceMax; advance2++){
+			for(let advance1=0; advance1 <= this.toDashAndJumpAdvanceMax; advance1++){
 				let cnt = 0;
 				for(let x of candidates){
 					if(
@@ -118,7 +119,7 @@ const HeavyLobster = {
 
 		let walkAndJumpCnt = 0;
 		let postWalkAdvance = 0;
-		for(let advance=0; advance <= this.advanceMax2; advance++){
+		for(let advance=0; advance <= this.postWalkAdvanceMax; advance++){
 			let cnt = 0;
 			for(let x of candidates){
 				if(
