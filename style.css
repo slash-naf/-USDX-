@@ -26,3 +26,6 @@ li:before, th:before{
 	content: '・';
 	color: #888;
 }
+input[type="number"]{
+	width: 4em;
+}
