@@ -19,7 +19,7 @@ td, th{
 	padding: 0;
 	font-weight: normal;
 }
-table.output td{
+table.spaced td{
 	padding-left: 1em;
 }
 li:before, th:before{

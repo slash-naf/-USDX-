@@ -25,7 +25,7 @@
 				<tr><td><button>↙</button><td><button>↓</button><td><button>↘</button>
 			</table>
 		</li>
-	</ul><table class="output">
+	</ul><table class="spaced">
 		<tr class="preFight"><th>戦うまでに<td class="advance"><td><input type="number">
 		<tr class="postDash"><th>走ったら<td class="advance"><td><input type="number">
 		<tr class="postWalk"><th>歩いたら<td class="advance"><td><input type="number">
@@ -77,21 +77,26 @@
 			}
 		});
 
+
 		HeavyLobster.input = document.querySelector('#heavy-lobster .input input');
-		HeavyLobster.output = {
-			preFightAdvance: document.querySelector('#heavy-lobster .output .preFight .advance'),
-			postDashAdvance: document.querySelector('#heavy-lobster .output .postDash .advance'),
-			postWalkAdvance: document.querySelector('#heavy-lobster .output .postWalk .advance'),
+		HeavyLobster.nodes = {
+			preFightAdvance: document.querySelector('#heavy-lobster .preFight .advance'),
+			postDashAdvance: document.querySelector('#heavy-lobster .postDash .advance'),
+			postWalkAdvance: document.querySelector('#heavy-lobster .postWalk .advance'),
+			preFightAdvanceMax: document.querySelector('#heavy-lobster .preFight input'),
+			postDashAdvanceMax: document.querySelector('#heavy-lobster .postDash input'),
+			postWalkAdvanceMax: document.querySelector('#heavy-lobster .postWalk input'),
 		};
+
 		HeavyLobster.input.oninput = _=>{
-			const out = HeavyLobster.output;
+			const nodes = HeavyLobster.nodes;
 			let pattern = numpadToArrow(HeavyLobster.input.value);
 			HeavyLobster.input.value = pattern;
 
 			if(pattern.length < 5){
-				out.preFightAdvance.textContent = '';
-				out.postDashAdvance.textContent = '';
-				out.postWalkAdvance.textContent = '';
+				nodes.preFightAdvance.textContent = '';
+				nodes.postDashAdvance.textContent = '';
+				nodes.postWalkAdvance.textContent = '';
 				return;
 			}
 			pattern = pattern.split('').map(x => Star.names.indexOf(x));
@@ -99,9 +104,9 @@
 			let searchRslt = HeavyLobster.search(pattern);
 			let calcRslt = HeavyLobster.calc(searchRslt);
 
-			out.preFightAdvance.textContent = calcRslt.preFightAdvance;
-			out.postDashAdvance.textContent = calcRslt.postDashAdvance;
-			out.postWalkAdvance.textContent = calcRslt.postWalkAdvance;
+			nodes.preFightAdvance.textContent = calcRslt.preFightAdvance;
+			nodes.postDashAdvance.textContent = calcRslt.postDashAdvance;
+			nodes.postWalkAdvance.textContent = calcRslt.postWalkAdvance;
 		}
 		document.querySelectorAll('#heavy-lobster .input button').forEach(el =>{
 			el.onclick = _=>{
@@ -110,6 +115,7 @@
 			}
 		});
 
+		
 	</script>
 </body>
 </html>
