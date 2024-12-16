@@ -88,22 +88,41 @@
 			postWalkAdvanceMax: document.querySelector('#heavy-lobster .postWalk input'),
 		};
 
+		HeavyLobster.nodes.preFightAdvanceMax.value = HeavyLobster.preFightAdvanceMax;
+		HeavyLobster.nodes.postDashAdvanceMax.value = HeavyLobster.postDashAdvanceMax;
+		HeavyLobster.nodes.postWalkAdvanceMax.value = HeavyLobster.postWalkAdvanceMax;
+
 		HeavyLobster.input.oninput = _=>{
 			const nodes = HeavyLobster.nodes;
+
+			//乱数を進める上限を反映
+			HeavyLobster.preFightAdvanceMax = Number(nodes.preFightAdvanceMax.value);
+			HeavyLobster.postDashAdvanceMax = Number(nodes.postDashAdvanceMax.value);
+			HeavyLobster.postWalkAdvanceMax = Number(nodes.postWalkAdvanceMax.value);
+
+			//数字を矢印に
 			let pattern = numpadToArrow(HeavyLobster.input.value);
 			HeavyLobster.input.value = pattern;
 
+			//5文字未満なら結果を非表示にして終わり
 			if(pattern.length < 5){
 				nodes.preFightAdvance.textContent = '';
 				nodes.postDashAdvance.textContent = '';
 				nodes.postWalkAdvance.textContent = '';
 				return;
 			}
+
+			//矢印を数値に
 			pattern = pattern.split('').map(x => Star.names.indexOf(x));
 
+			console.log(pattern);
+			console.log(HeavyLobster);
+
+			//乱数をいくつ進めるか計算
 			let searchRslt = HeavyLobster.search(pattern);
 			let calcRslt = HeavyLobster.calc(searchRslt);
 
+			//出力
 			nodes.preFightAdvance.textContent = calcRslt.preFightAdvance;
 			nodes.postDashAdvance.textContent = calcRslt.postDashAdvance;
 			nodes.postWalkAdvance.textContent = calcRslt.postWalkAdvance;
