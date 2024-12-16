@@ -37,7 +37,7 @@ const Corkboard = {
 
 //ヘビーロブスター戦で星の向きから乱数を予測し、乱数をいくつ手動で進めれば目的の乱数を引けるか計算
 const HeavyLobster = {
-	toDashAndJumpAdvanceMax: 40,
+	preFightAdvanceMax: 40,
 	postDashAdvanceMax: 7,
 	postWalkAdvanceMax: 11,
 	search(pattern){
@@ -87,10 +87,10 @@ const HeavyLobster = {
 	},
 	calc(candidates){
 		let dashAndJumpCnt = 0;
-		let toDashAndJumpAdvance = 0;
+		let preFightAdvance = 0;
 		let postDashAdvance = 0;
 		for(let advance2=0; advance2 <= this.postDashAdvanceMax; advance2++){
-			for(let advance1=0; advance1 <= this.toDashAndJumpAdvanceMax; advance1++){
+			for(let advance1=0; advance1 <= this.preFightAdvanceMax; advance1++){
 				let cnt = 0;
 				for(let x of candidates){
 					if(
@@ -102,7 +102,7 @@ const HeavyLobster = {
 				}
 				if(cnt > dashAndJumpCnt){
 					dashAndJumpCnt = cnt;
-					toDashAndJumpAdvance = advance1;
+					preFightAdvance = advance1;
 					postDashAdvance = advance2;
 				}
 			}
@@ -110,7 +110,7 @@ const HeavyLobster = {
 
 		let walkCnt = 0;
 		candidates = candidates.filter(x =>{
-			if(randiAt(x.dashOrWalkIdx + toDashAndJumpAdvance, 4) == 0){
+			if(randiAt(x.dashOrWalkIdx + preFightAdvance, 4) == 0){
 				walkCnt += x.cnt;
 				return true;
 			}
@@ -123,7 +123,7 @@ const HeavyLobster = {
 			let cnt = 0;
 			for(let x of candidates){
 				if(
-					randiAt(x.postWalkIdx + toDashAndJumpAdvance + advance, 4) == 0
+					randiAt(x.postWalkIdx + preFightAdvance + advance, 4) == 0
 				){
 					cnt += x.cnt
 				}
@@ -135,7 +135,7 @@ const HeavyLobster = {
 		}
 
 		return {
-			toDashAndJumpAdvance: toDashAndJumpAdvance,
+			preFightAdvance: preFightAdvance,
 			postDashAdvance: postDashAdvance,
 			postWalkAdvance: postWalkAdvance,
 			dashAndJumpCnt: dashAndJumpCnt,

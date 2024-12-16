@@ -26,9 +26,9 @@
 			</table>
 		</li>
 	</ul><table class="output">
-		<tr><th>戦うまでに<td class="toDashAndJumpAdvance">
-		<tr><th>走ったら<td class="postDashAdvance">
-		<tr><th>歩いたら<td class="postWalkAdvance">
+		<tr class="preFight"><th>戦うまでに<td class="advance"><td><input type="number">
+		<tr class="postDash"><th>走ったら<td class="advance"><td><input type="number">
+		<tr class="postWalk"><th>歩いたら<td class="advance"><td><input type="number">
 	</table></li></ul>
 	<script type="module">
 
@@ -79,7 +79,7 @@
 
 		HeavyLobster.input = document.querySelector('#heavy-lobster .input input');
 		HeavyLobster.output = {
-			toDashAndJumpAdvance: document.querySelector('#heavy-lobster .output .toDashAndJumpAdvance'),
+			preFightAdvance: document.querySelector('#heavy-lobster .output .preFightAdvance'),
 			postDashAdvance: document.querySelector('#heavy-lobster .output .postDashAdvance'),
 			postWalkAdvance: document.querySelector('#heavy-lobster .output .postWalkAdvance'),
 		};
@@ -89,7 +89,7 @@
 			HeavyLobster.input.value = pattern;
 
 			if(pattern.length < 5){
-				out.toDashAndJumpAdvance.textContent = '';
+				out.preFightAdvance.textContent = '';
 				out.postDashAdvance.textContent = '';
 				out.postWalkAdvance.textContent = '';
 				return;
@@ -99,7 +99,7 @@
 			let searchRslt = HeavyLobster.search(pattern);
 			let calcRslt = HeavyLobster.calc(searchRslt);
 
-			out.toDashAndJumpAdvance.textContent = calcRslt.toDashAndJumpAdvance;
+			out.preFightAdvance.textContent = calcRslt.preFightAdvance;
 			out.postDashAdvance.textContent = calcRslt.postDashAdvance;
 			out.postWalkAdvance.textContent = calcRslt.postWalkAdvance;
 		}
