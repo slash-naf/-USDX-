@@ -54,6 +54,7 @@
 			return arrowMap[m];
 		});
 
+
 		Corkboard.input = document.querySelector('#corkboard .input input');
 		Corkboard.output = document.querySelector('#corkboard .output');
 		Corkboard.input.oninput = _=>{
@@ -88,6 +89,10 @@
 			postWalkAdvanceMax: document.querySelector('#heavy-lobster .postWalk input'),
 		};
 
+		//乱数を進める上限のロード
+		HeavyLobster.preFightAdvanceMax = Number(localStorage.getItem('HeavyLobster.preFightAdvanceMax'));
+		HeavyLobster.postDashAdvanceMax = Number(localStorage.getItem('HeavyLobster.postDashAdvanceMax'));
+		HeavyLobster.postWalkAdvanceMax = Number(localStorage.getItem('HeavyLobster.postWalkAdvanceMax'));
 		HeavyLobster.nodes.preFightAdvanceMax.value = HeavyLobster.preFightAdvanceMax;
 		HeavyLobster.nodes.postDashAdvanceMax.value = HeavyLobster.postDashAdvanceMax;
 		HeavyLobster.nodes.postWalkAdvanceMax.value = HeavyLobster.postWalkAdvanceMax;
@@ -134,7 +139,12 @@
 			}
 		});
 
-		
+		onbeforeunload = e =>{
+			//乱数を進める上限のセーブ
+			localStorage.setItem('HeavyLobster.preFightAdvanceMax', HeavyLobster.preFightAdvanceMax);
+			localStorage.setItem('HeavyLobster.postDashAdvanceMax', HeavyLobster.postDashAdvanceMax);
+			localStorage.setItem('HeavyLobster.postWalkAdvanceMax', HeavyLobster.postWalkAdvanceMax);
+		}
 	</script>
 </body>
 </html>
