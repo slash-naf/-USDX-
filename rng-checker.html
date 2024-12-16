@@ -39,6 +39,20 @@
 			let n = parseInt(c, 36);
 			return isNaN(n) ? -1 : n;
 		});
+		const numpadToArrow = s => s.replace(/[1-9]/g, m =>{
+			const arrowMap = {
+				8: "↑",
+				9: "↗",
+				6: "→",
+				3: "↘",
+				2: "↓",
+				1: "↙",
+				4: "←",
+				7: "↖",
+				5: "?"
+			};
+			return arrowMap[m];
+		});
 
 		Corkboard.input = document.querySelector('#corkboard .input input');
 		Corkboard.output = document.querySelector('#corkboard .output');
@@ -70,22 +84,9 @@
 			postWalkAdvance: document.querySelector('#heavy-lobster .output .postWalkAdvance'),
 		};
 		HeavyLobster.input.oninput = _=>{
-			let out = HeavyLobster.output;
-			let pattern = HeavyLobster.input.value;
-			HeavyLobster.input.value = pattern.replace(/[1-9]/g, m =>{
-				const arrowMap = {
-					8: "↑",
-					9: "↗",
-					6: "→",
-					3: "↘",
-					2: "↓",
-					1: "↙",
-					4: "←",
-					7: "↖",
-					5: "?"
-				};
-				return arrowMap[m];
-			});
+			const out = HeavyLobster.output;
+			let pattern = numpadToArrow(HeavyLobster.input.value);
+			HeavyLobster.input.value = pattern;
 
 			if(pattern.length < 5){
 				out.toDashAndJumpAdvance.textContent = '';
