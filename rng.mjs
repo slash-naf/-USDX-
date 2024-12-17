@@ -87,6 +87,9 @@ const HeavyLobster = {
 	},
 	calc(candidates){
 		let rslt = {
+			cnt: candidates.cntSum,
+			dashCnt: 0,
+			walkCnt: 0,
 			dashAndJumpCnt: 0,
 			walkAndJumpCnt: 0,
 			jumpCnt: 0,
@@ -148,6 +151,17 @@ const HeavyLobster = {
 				rslt.preFightAdvance = advance1;
 				rslt.postDashAdvance = postDashAdvance;
 				rslt.postWalkAdvance = postWalkAdvance;
+			}
+		}
+
+		//走るパターンと歩くパターンの数
+		for(let x of candidates){
+			//走るなら
+			if(0 < randiAt(x.dashOrWalkIdx + rslt.preFightAdvance, 4)){
+				rslt.dashCnt += x.cnt;
+			//歩くなら
+			}else{
+				rslt.walkCnt += x.cnt;
 			}
 		}
 

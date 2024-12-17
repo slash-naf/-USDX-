@@ -127,6 +127,9 @@
 			let searchRslt = HeavyLobster.search(pattern);
 			let calcRslt = HeavyLobster.calc(searchRslt);
 
+			console.log(searchRslt);
+			console.log(calcRslt);
+
 			//出力
 			nodes.preFightAdvance.textContent = calcRslt.preFightAdvance;
 			nodes.postDashAdvance.textContent = calcRslt.postDashAdvance;
