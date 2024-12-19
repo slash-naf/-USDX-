@@ -40,6 +40,7 @@ const HeavyLobster = {
 	preFightAdvanceMax: 31,
 	postDashAdvanceMax: 7,
 	postWalkAdvanceMax: 11,
+	//星の向きから乱数を推測
 	search(pattern){
 		let ofs = 0;
 
@@ -75,7 +76,7 @@ const HeavyLobster = {
 		for(const [ofs, cnt] of map.entries()){
 			let n = ofs >> 12;
 			rslt.push({
-				dashOrWalkIdx: (ofs + 555 + n) & 0xFFF,
+				dashWalkIdx: (ofs + 555 + n) & 0xFFF,
 				postDashIdx: (ofs + 584) & 0xFFF,
 				postWalkIdx: (ofs + 598 + n) & 0xFFF,
 				cnt: cnt
@@ -85,85 +86,92 @@ const HeavyLobster = {
 
 		return rslt;
 	},
+	//乱数を進める最適な量を計算
 	calc(candidates){
-		let rslt = {
-			cnt: candidates.cntSum,
-			dashCnt: 0,
-			walkCnt: 0,
-			dashAndJumpCnt: 0,
-			walkAndJumpCnt: 0,
-			jumpCnt: 0,
-			preFightAdvance: 0,
-			postDashAdvance: 0,
-			postWalkAdvance: 0,
-		};
-
-		const postDashOrWalkAdvanceMax = Math.max(this.postDashAdvanceMax, this.postWalkAdvanceMax);
-
-		for(let advance1=0; advance1 <= this.preFightAdvanceMax; advance1++){
-
-			let dashAndJumpCnt = 0;
-			let postDashAdvance = 0;
-			let walkAndJumpCnt = 0;
-			let postWalkAdvance = 0;
-
-			//飛ぶかの判定までに進める乱数の最適な量を探す
-			for(let advance2=0; advance2 <= postDashOrWalkAdvanceMax; advance2++){
-				let _dashAndJumpCnt = 0;
-				let _walkAndJumpCnt = 0;
+		//飛ぶかの判定までにさらに進める乱数の最適な量を探す
+		const maxJumpCntFromPreFightAdvance = preFightAdvance =>{
+			let rslt = {
+				dashJumpCnt: 0,
+				postDashAdvance: 0,
+				walkJumpCnt: 0,
+				postWalkAdvance: 0,
+			};
+			for(let i=0, leDash, leWalk; (leDash = i <= this.postDashAdvanceMax) | (leWalk = i <= this.postWalkAdvanceMax); i++){
+				//走った場合と歩いた場合のジャンプする確率を調べる
+				let dashJumpCnt = 0;
+				let walkJumpCnt = 0;
 				for(let x of candidates){
-					//走るなら
-					if(0 < randiAt(x.dashOrWalkIdx + advance1, 4)){
-						//飛ぶなら
-						if(advance2 <= this.postDashAdvanceMax && 0 == randiAt(x.postDashIdx + advance1 + advance2, 4)){
-							_dashAndJumpCnt += x.cnt;
+					if(0 < randiAt(x.dashWalkIdx + preFightAdvance, 4)){	//走るなら
+						if(leDash && 0 == randiAt(x.postDashIdx + preFightAdvance + i, 4)){
+							dashJumpCnt += x.cnt;
 						}
-					//歩くなら
-					}else{
-						//飛ぶなら
-						if(advance2 <= this.postWalkAdvanceMax && 0 == randiAt(x.postWalkIdx + advance1 + advance2, 4)){
-							_walkAndJumpCnt += x.cnt;
+					}else{	//歩くなら
+						if(leWalk && 0 == randiAt(x.postWalkIdx + preFightAdvance + i, 4)){
+							walkJumpCnt += x.cnt;
 						}
 					}
 				}
-
 				//より高確率なら更新
-				if(_dashAndJumpCnt > dashAndJumpCnt){
-					dashAndJumpCnt = _dashAndJumpCnt;
-					postDashAdvance = advance2;
+				if(dashJumpCnt > rslt.dashJumpCnt){
+					rslt.dashJumpCnt = dashJumpCnt;
+					rslt.postDashAdvance = i;
 				}
-				if(_walkAndJumpCnt > walkAndJumpCnt){
-					walkAndJumpCnt = _walkAndJumpCnt;
-					postWalkAdvance = advance2;
+				if(walkJumpCnt > rslt.walkJumpCnt){
+					rslt.walkJumpCnt = walkJumpCnt;
+					rslt.postWalkAdvance = i;
 				}
 			}
+			return rslt;
+		}
 
-			//飛ぶ確率、走る確率、走った場合の進める量の少なさの順の条件で更新
-			const jumpCnt = dashAndJumpCnt + walkAndJumpCnt;
-			if(
-				jumpCnt > rslt.jumpCnt || 
-				(jumpCnt >= rslt.jumpCnt && dashAndJumpCnt > rslt.dashAndJumpCnt) || 
-				(jumpCnt >= rslt.jumpCnt && dashAndJumpCnt >= rslt.dashAndJumpCnt && postDashAdvance < rslt.postDashAdvance)
-			){
-				rslt.dashAndJumpCnt = dashAndJumpCnt;
-				rslt.walkAndJumpCnt = walkAndJumpCnt;
+		//乱数を進める最適な量を探す
+		let rslt = {
+			cnt: candidates.cntSum,
+
+			dashJumpCnt: 0,
+			postDashAdvance: 0,
+			walkJumpCnt: 0,
+			postWalkAdvance: 0,
+
+			preFightAdvance: 0,
+			jumpCnt: 0,
+			dashCnt: 0,
+			dashGlideCnt: 0,
+
+			walkCnt: 0,
+			walkGlideCnt: 0,
+			glideCnt: 0,
+		};
+		for(let preFightAdvance=0; preFightAdvance <= this.preFightAdvanceMax; preFightAdvance++){
+			let t = maxJumpCntFromPreFightAdvance(preFightAdvance);
+
+			//飛ぶ確率、走って飛ぶ確率、走ったら進める量の少なさ、歩いたら進める量の少なさ、走って滑走する確率の順の条件で更新
+			let jumpCnt = t.dashJumpCnt + t.walkJumpCnt;
+			let dashCnt = candidates.reduce((prev, x)=> 0 < randiAt(x.dashWalkIdx + preFightAdvance, 4) ? prev + x.cnt : prev, 0);
+			let dashGlideCnt = dashCnt - t.dashJumpCnt;
+			if( 0 < (
+				jumpCnt - rslt.jumpCnt ||
+				t.dashJumpCnt - rslt.dashJumpCnt ||
+				rslt.postDashAdvance - t.postDashAdvance ||
+				rslt.postWalkAdvance - t.postWalkAdvance ||
+				dashGlideCnt - rslt.dashGlideCnt
+			)){
+				rslt.preFightAdvance = preFightAdvance;
 				rslt.jumpCnt = jumpCnt;
-				rslt.preFightAdvance = advance1;
-				rslt.postDashAdvance = postDashAdvance;
-				rslt.postWalkAdvance = postWalkAdvance;
+				rslt.dashCnt = dashCnt;
+				rslt.dashGlideCnt = dashGlideCnt;
+
+				rslt.dashJumpCnt = t.dashJumpCnt;
+				rslt.postDashAdvance = t.postDashAdvance;
+				rslt.walkJumpCnt = t.walkJumpCnt;
+				rslt.postWalkAdvance = t.postWalkAdvance;
 			}
 		}
 
-		//走るパターンと歩くパターンの数
-		for(let x of candidates){
-			//走るなら
-			if(0 < randiAt(x.dashOrWalkIdx + rslt.preFightAdvance, 4)){
-				rslt.dashCnt += x.cnt;
-			//歩くなら
-			}else{
-				rslt.walkCnt += x.cnt;
-			}
-		}
+		//他の確率
+		rslt.walkCnt = rslt.cnt - rslt.dashCnt;
+		rslt.walkGlideCnt = rslt.walkCnt - rslt.walkJumpCnt;
+		rslt.glideCnt = rslt.cnt - rslt.jumpCnt;
 
 		return rslt;
 	}
