@@ -26,9 +26,10 @@
 			</table>
 		</li>
 	</ul><table class="spaced">
-		<tr class="preFight"><th>戦うまでに<td class="advance"><td><input type="number">
-		<tr class="postDash"><th>走ったら<td class="advance"><td><input type="number">
-		<tr class="postWalk"><th>歩いたら<td class="advance"><td><input type="number">
+		<tr>                 <td>          <td>進める量        <td>飛ぶ確率            <td>進める上限
+		<tr class="preFight"><th>戦うまでに<td class="advance"><td class="probability"><td><input type="number">
+		<tr class="postDash"><th>走ったら  <td class="advance"><td class="probability"><td><input type="number">
+		<tr class="postWalk"><th>歩いたら  <td class="advance"><td class="probability"><td><input type="number">
 	</table></li></ul>
 	<script type="module">
 
@@ -84,6 +85,9 @@
 			preFightAdvance: document.querySelector('#heavy-lobster .preFight .advance'),
 			postDashAdvance: document.querySelector('#heavy-lobster .postDash .advance'),
 			postWalkAdvance: document.querySelector('#heavy-lobster .postWalk .advance'),
+			preFightProbability: document.querySelector('#heavy-lobster .preFight .probability'),
+			postDashProbability: document.querySelector('#heavy-lobster .postDash .probability'),
+			postWalkProbability: document.querySelector('#heavy-lobster .postWalk .probability'),
 			preFightAdvanceMax: document.querySelector('#heavy-lobster .preFight input'),
 			postDashAdvanceMax: document.querySelector('#heavy-lobster .postDash input'),
 			postWalkAdvanceMax: document.querySelector('#heavy-lobster .postWalk input'),
@@ -114,26 +118,26 @@
 				nodes.preFightAdvance.textContent = '';
 				nodes.postDashAdvance.textContent = '';
 				nodes.postWalkAdvance.textContent = '';
+				nodes.preFightProbability.textContent = '';
+				nodes.postDashProbability.textContent = '';
+				nodes.postWalkProbability.textContent = '';
 				return;
 			}
 
 			//矢印を数値に
 			pattern = pattern.split('').map(x => Star.names.indexOf(x));
 
-			console.log(pattern);
-			console.log(HeavyLobster);
-
 			//乱数をいくつ進めるか計算
-			let searchRslt = HeavyLobster.search(pattern);
-			let calcRslt = HeavyLobster.calc(searchRslt);
-
-			console.log(searchRslt);
-			console.log(calcRslt);
+			let search = HeavyLobster.search(pattern);
+			let calc = HeavyLobster.calc(search);
 
 			//出力
-			nodes.preFightAdvance.textContent = calcRslt.preFightAdvance;
-			nodes.postDashAdvance.textContent = calcRslt.postDashAdvance;
-			nodes.postWalkAdvance.textContent = calcRslt.postWalkAdvance;
+			nodes.preFightAdvance.textContent = calc.preFightAdvance;
+			nodes.postDashAdvance.textContent = calc.postDashAdvance;
+			nodes.postWalkAdvance.textContent = calc.postWalkAdvance;
+			nodes.preFightProbability.textContent =  calc.jumpCnt+'/'+calc.cnt;
+			nodes.postDashProbability.textContent = calc.dashJumpCnt+'/'+calc.dashCnt;
+			nodes.postWalkProbability.textContent = calc.walkJumpCnt+'/'+calc.walkCnt;
 		}
 		document.querySelectorAll('#heavy-lobster .input button').forEach(el =>{
 			el.onclick = _=>{

@@ -40,6 +40,12 @@ const HeavyLobster = {
 	preFightAdvanceMax: 31,
 	postDashAdvanceMax: 7,
 	postWalkAdvanceMax: 11,
+
+	isDash: i => rngAt(i) >> 10,
+	isWalk: i => !(rngAt(i) >> 10),
+	isGlide: i => rngAt(i) >> 10,
+	isJump: i => !(rngAt(i) >> 10),
+
 	//星の向きから乱数を推測
 	search(pattern){
 		let ofs = 0;
@@ -101,12 +107,12 @@ const HeavyLobster = {
 				let dashJumpCnt = 0;
 				let walkJumpCnt = 0;
 				for(let x of candidates){
-					if(0 < randiAt(x.dashWalkIdx + preFightAdvance, 4)){	//走るなら
-						if(leDash && 0 == randiAt(x.postDashIdx + preFightAdvance + i, 4)){
+					if(this.isDash(x.dashWalkIdx + preFightAdvance)){	//走るなら
+						if(leDash && this.isJump(x.postDashIdx + preFightAdvance + i)){
 							dashJumpCnt += x.cnt;
 						}
 					}else{	//歩くなら
-						if(leWalk && 0 == randiAt(x.postWalkIdx + preFightAdvance + i, 4)){
+						if(leWalk && this.isJump(x.postWalkIdx + preFightAdvance + i)){
 							walkJumpCnt += x.cnt;
 						}
 					}
@@ -147,7 +153,7 @@ const HeavyLobster = {
 
 			//飛ぶ確率、走って飛ぶ確率、走ったら進める量の少なさ、歩いたら進める量の少なさ、走って滑走する確率の順の条件で更新
 			let jumpCnt = t.dashJumpCnt + t.walkJumpCnt;
-			let dashCnt = candidates.reduce((prev, x)=> 0 < randiAt(x.dashWalkIdx + preFightAdvance, 4) ? prev + x.cnt : prev, 0);
+			let dashCnt = candidates.reduce((prev, x)=> this.isDash(x.dashWalkIdx + preFightAdvance) ? prev + x.cnt : prev, 0);
 			let dashGlideCnt = dashCnt - t.dashJumpCnt;
 			if( 0 < (
 				jumpCnt - rslt.jumpCnt ||
