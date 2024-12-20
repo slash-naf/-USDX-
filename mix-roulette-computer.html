@@ -7,33 +7,51 @@
 </head>
 <body>
 	<script>
-		enemies = ['カッター', 'ビーム', 'ヨーヨー', 'ニンジャ', 'ウィング', 'ファイター', 'ジェット', 'ソード', 'ファイア', 'ストーン', 'ボム', 'プラズマ', 'ホイール', 'アイス', 'ミラー', 'コピー', 'スープレックス', 'ハンマー', 'パラソル', 'マイク', 'スリープ', 'ペイント', 'コック', 'クラッシュ']
-		abilities = ['ヨーヨー', 'ニンジャ', 'ソード', 'ウィング', 'ホイール', 'ジェット', 'いてっ！', 'ビーム', 'スープレックス', 'スリープ', 'クラッシュ', 'ストーン', 'プラズマ', 'パラソル', 'アイス', 'ミラー', 'ハンマー', 'コック', 'ファイター', 'コピー', 'むてきキャンディ', 'ボム', 'ファイア', 'カッター', 'マイク']
-		first = document.createElement('select')
-		for(let enemy of enemies){
-			let child = document.createElement('option')
-			child.label = enemy
-			first.appendChild(child)
-		}
-		second = first.cloneNode(true)
-		roulette = document.createElement('ol')
-		for(let i=0; i < 26; i++){
-			roulette.appendChild(document.createElement('li'))
-		}
-		document.body.appendChild(first)
-		document.body.appendChild(second)
-		document.body.appendChild(roulette)
-		function display(){
-			let start = first.selectedIndex + second.selectedIndex
-			for(let i=0; i < 25; i++){
-				roulette.children[i].innerText = abilities[(start + i) % 25]
+
+		const Mix = {
+			enemies: ['カッター', 'ビーム', 'ヨーヨー', 'ニンジャ', 'ウィング', 'ファイター', 'ジェット', 'ソード', 'ファイア', 'ストーン', 'ボム', 'プラズマ', 'ホイール', 'アイス', 'ミラー', 'コピー', 'スープレックス', 'ハンマー', 'パラソル', 'マイク', 'スリープ', 'ペイント', 'コック', 'クラッシュ'],
+			abilities: ['ヨーヨー', 'ニンジャ', 'ソード', 'ウィング', 'ホイール', 'ジェット', 'いてっ！', 'ビーム', 'スープレックス', 'スリープ', 'クラッシュ', 'ストーン', 'プラズマ', 'パラソル', 'アイス', 'ミラー', 'ハンマー', 'コック', 'ファイター', 'コピー', 'むてきキャンディ', 'ボム', 'ファイア', 'カッター', 'マイク'],
+			calc(enemy1, enemy2){
+				let start = enemy1 + enemy2;
+				let end = start + (start + 1) % 25 + 76;
+				let roulette = [];
+				for(let i = start; i <= end; i++){
+					roulette.push(this.abilities[i % 25]);
+				}
+				return {start, end, roulette};
 			}
-			roulette.lastChild.innerText = abilities[(start + 1) * 2 % 25]
-			roulette.lastChild.value = (start + 1) % 25 + 77
 		}
-		display()
-		first.onchange = display
-		second.onchange = display
+
+		//1週目とストップ能力を表示するリスト
+		const roulette = document.createElement('ol');
+		for(let i=0; i < 26; i++){
+			roulette.appendChild(document.createElement('li'));
+		}
+
+		//ミックスする敵を選択するリスト
+		const enemy1 = document.createElement('select');
+		for(let enemy of Mix.enemies){
+			let child = document.createElement('option');
+			child.label = enemy;
+			enemy1.appendChild(child);
+		}
+		enemy1.onchange = _=>{
+			let mix = Mix.calc(enemy1.selectedIndex, enemy2.selectedIndex)
+			for(let i=0; i < 25; i++){
+				roulette.children[i].innerText = mix.roulette[i];
+			}
+			roulette.lastChild.innerText = mix.roulette.at(-1);
+			roulette.lastChild.value = mix.roulette.length;
+		}
+		const enemy2 = enemy1.cloneNode(true);
+		enemy2.onchange = enemy1.onchange;
+
+		//DOMの追加
+		document.body.appendChild(enemy1);
+		document.body.appendChild(enemy2);
+		document.body.appendChild(roulette);
+
+		enemy1.onchange();
 	</script>
 </body>
 </html>
