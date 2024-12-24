@@ -25,6 +25,7 @@ class index{
 public class NdsCheatEditer{
 	public void code(){
 		//ゲームのメモリ
+		Var timerMoving = memory(0x02041D5C, 1);	//動いていれば0
 		Var timer = memory(0x02041D60, 4);
 
 		Var music = memory(0x020485C4, 4);
@@ -198,6 +199,11 @@ public class NdsCheatEditer{
 					{
 						situation.set(6);	//再戦
 						arenaCntSav.copy(arenaCnt);
+
+						timerMoving.cmp(ne, 0);//タイマーが止まっていれば
+						{
+							timer.set(0);
+						}
 					}
 				}
 				end();
