@@ -136,13 +136,13 @@ public class NdsCheatEditer{
 			{
 				//タイマーリセット
 				timer.set(0xFFFFFFFF);	//ずれを考慮して
-				//体力全快
-				maxHp1.copy(hp1);
-				maxHp2.copy(hp2);
+
 				//残機99
 				life.set(99);
 
-				initializeOffset();
+				//体力全快
+				maxHp1.copy(hp1);
+				maxHp2.copy(hp2);
 
 				//ヘルマスでなければ能力面のロード
 				Append("A205B244 00FF0900\n");
@@ -175,8 +175,6 @@ public class NdsCheatEditer{
 				musicConfig.cmp(eq, 1);
 				{
 					music.set(music_reset);
-
-
 				}
 				end();
 				//2なら曲ミュート(分かりやすいようにここに書いてるけど常時実行される)
@@ -206,9 +204,9 @@ public class NdsCheatEditer{
 				checkPoint.cmp(eq, 2);	//startFromCheckPoint
 
 				//フロア・座標をロード
+				situation.set(situation_loadFloor);
 				stageAndFloorSav.copy(stageAndFloor);
 				posSav.copy(setPos);
-				situation.set(situation_loadFloor);
 
 				gamemode.cmp(eq, gamemode_mw);	//銀河なら
 				{
@@ -414,7 +412,7 @@ public class Var{
 	}
 	public void cmp(uint ins, uint n, uint mask = 0){
 		calcAddr();
-		p.initializeOffset();
+		//p.initializeOffset();
 		if(this.len <= 2){ins += 4;}
 		switch(this.len){
 		case 1:
