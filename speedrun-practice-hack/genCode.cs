@@ -19,7 +19,7 @@ class index{
 		var e = new NdsCheatEditer();
 		string s = e.sb.ToString();
 		Clipboard.SetText(s);
-		Console.WriteLine(s);
+		Console.WriteLine("a");
 	}
 }
 public class NdsCheatEditer{
