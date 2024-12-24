@@ -189,9 +189,10 @@ public class NdsCheatEditer{
 		}
 		end();
 
+		//格闘王系なら(7～Aでメタゴーでなければ)
 		ifPress(L);
 		situation.cmp(eq, situation_play);
-		Append("8205B244 00FF0600\n");	//格闘王系なら
+		Append("8205B244 00FF0600\n");
 		Append("A205B244 00FF0800\n");
 		Append("7205B244 00FF0B00\n");
 		{
@@ -204,6 +205,7 @@ public class NdsCheatEditer{
 		}
 		end();
 
+		//格闘王系でなければ(まだ通常時なら)
 		ifPress(L);
 		situation.cmp(eq, situation_play);
 		gamemode.cmp(eq, gamemode_mw);	//銀河なら
@@ -217,6 +219,7 @@ public class NdsCheatEditer{
 		ifPress(L);
 		situation.cmp(eq, situation_play);
 		{
+			//フロア・座標をロード
 			stageAndFloorSav.copy(stageAndFloor);
 			posSav.copy(setPos);
 			situation.set(situation_loadFloor);
@@ -245,6 +248,7 @@ public class NdsCheatEditer{
 		}
 		end();
 
+		//前回の場面が通常で、現在の場面が通常でもポーズでもなければ（つまりフロア遷移時なら・ロード中などに入った最初のフレームなら）
 		situation.cmp(ne, situation_play);
 		situation.cmp(ne, situation_pause);
 		prevSituation.cmp(eq, situation_play);
@@ -254,12 +258,13 @@ public class NdsCheatEditer{
 		}
 		end();
 
-
-		gamemode.cmp(lt, 7);	//タイマーが表示されるモードなら
+		//タイマーが表示されるゲームモードなら
+		gamemode.cmp(lt, 7);
 		{
-			displayMode.set(displayMode_number);	//スコア・ゴールドを常に表示
-			displayTime.copy(score);
+			displayMode.set(displayMode_number);	//ボス戦でもスコア・ゴールドが常に表示されるようにする
+			displayTime.copy(score);	//スコアに表示
 
+			//洞窟ならゴールドに表示
 			gamemode.cmp(eq, gamemode_gco);
 			{
 				displayTime.copy(gold);
@@ -267,7 +272,7 @@ public class NdsCheatEditer{
 		}
 		end();
 
-		//R+startでポーズできない所でポーズ
+		//R+startで、本来ポーズできない所でもポーズ
 		input.cmp(eq, 0, R);
 		ifPress(START);
 		{
