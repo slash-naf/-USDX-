@@ -156,8 +156,8 @@ public class NdsCheatEditer{
 					//ウィリーに乗る処理
 					helperCondSav.cmp(eq, 0x0201);
 					{
-						Append("220BA31D 00000002\n");
-						Append("220BAB35 00000002\n");
+						wheelieRideBy2.set(2);
+						wheelieRodeBy2.set(2);
 					}
 				}
 				end();
