@@ -103,26 +103,138 @@ public class NdsCheatEditer{
 		Var mwSelCopySav = memory(1);
 
 
-		//ポーズ中にLでセーブ
+		Var checkPoint = memory(4);
+
+
 		ifPress(L);
-		situation.cmp(eq, situation_pause);
+		checkPoint.set(1);	//addCheckPoint
 		{
-			arenaCnt.copy(arenaCntSav);
-			stageAndFloor.copy(stageAndFloorSav);
-			posInit.copy(posSav);
-
-			input.cmp(ne, 0, R);	//Rを押しながらじゃなければ
+			//ポーズ中にLでセーブ
+			situation.cmp(eq, situation_pause);
 			{
-				kirbyCopy.copy(kirbyCopySav);
-				helperCopy.copy(helperCopySav);
-				helperCond.copy(helperCondSav);
-				mutekiInit.copy(mutekiSav);
+				arenaCnt.copy(arenaCntSav);
+				stageAndFloor.copy(stageAndFloorSav);
+				posInit.copy(posSav);
 
-				mwCopies.copy(mwCopiesSav);
-				mwSelCopy.copy(mwSelCopySav);
+				input.cmp(ne, 0, R);	//Rを押しながらじゃなければ
+				{
+					kirbyCopy.copy(kirbyCopySav);
+					helperCopy.copy(helperCopySav);
+					helperCond.copy(helperCondSav);
+					mutekiInit.copy(mutekiSav);
+
+					mwCopies.copy(mwCopiesSav);
+					mwSelCopy.copy(mwSelCopySav);
+				}
+			}
+			end();
+			checkPoint.cmp(eq, 1);	//startFromCheckPoint
+
+			//通常時ににLでロード
+			situation.cmp(eq, situation_play);
+			checkPoint.set(2);	//addCheckPoint
+			{
+				//タイマーリセット
+				timer.set(0xFFFFFFFF);	//ずれを考慮して
+				//体力全快
+				maxHp1.copy(hp1);
+				maxHp2.copy(hp2);
+				//残機99
+				life.set(99);
+
+				initializeOffset();
+
+				//ヘルマスでなければ能力面のロード
+				Append("A205B244 00FF0900\n");
+				{
+					kirbyCopySav.copy(kirbyCopy);
+					helperCopySav.copy(helperCopy);
+					helperCondSav.copy(helperCond);
+					mutekiSav.copy(muteki);
+
+					//ウィリーに乗る処理
+					helperCondSav.cmp(eq, 0x0201);
+					{
+						Append("220BA31D 00000002\n");
+						Append("220BAB35 00000002\n");
+					}
+				}
+				end();
+				checkPoint.cmp(eq, 2);	//startFromCheckPoint
+
+				//メタゴーならPt最大
+				Append("9205B244 00FF0800\n");
+				{
+					metaPt.set(50);
+				}
+				end();
+				checkPoint.cmp(eq, 2);	//startFromCheckPoint
+
+
+				//musicConfigが1なら曲リセット
+				musicConfig.cmp(eq, 1);
+				{
+					music.set(music_reset);
+
+
+				}
+				end();
+				//2なら曲ミュート(分かりやすいようにここに書いてるけど常時実行される)
+				musicConfig.cmp(eq, 2);
+				{
+					isMute.set(isMute_mute);
+				}
+				end();
+				checkPoint.cmp(eq, 2);	//startFromCheckPoint
+
+
+				//格闘王系なら(7～Aでメタゴーでなければ)
+				Append("8205B244 00FF0600\n");
+				Append("A205B244 00FF0800\n");
+				Append("7205B244 00FF0B00\n");
+				{
+					checkPoint.set(0);	//break的な
+
+					situation.set(5);	//次の戦闘へ
+					input.cmp(ne, 0, R);	//Rを押しながらじゃなければ
+					{
+						situation.set(6);	//再戦
+						arenaCntSav.copy(arenaCnt);
+					}
+				}
+				end();
+				checkPoint.cmp(eq, 2);	//startFromCheckPoint
+
+				//フロア・座標をロード
+				stageAndFloorSav.copy(stageAndFloor);
+				posSav.copy(setPos);
+				situation.set(situation_loadFloor);
+
+				gamemode.cmp(eq, gamemode_mw);	//銀河なら
+				{
+					mwSelCopyUpdateBy1.set(1);
+					mwCopiesSav.copy(mwCopies);
+					mwSelCopySav.copy(mwSelCopy);
+				}
+				end();
+				checkPoint.cmp(eq, 2);	//startFromCheckPoint
+
+				//洞窟なら宝とボスをリセット
+				gamemode.cmp(eq, gamemode_gco);
+				{
+					Append("0206E100 00000000\n");
+					Append("0206E104 00000000\n");
+					Append("2206E112 00000000\n");
+					Append("2206E10E 00000000\n");
+				}
+				end();
 			}
 		}
-		end();
+		checkPoint.set(0);	//checkPointの初期化
+
+
+
+
 
 		//ポーズ中に上入力で曲の設定
 		situation.cmp(eq, situation_pause);
@@ -132,108 +244,8 @@ public class NdsCheatEditer{
 		}
 		end();
 
-		//通常時ににLでロード
-		ifPress(L);
-		situation.cmp(eq, situation_play);
-		Append("A205B244 00FF0900\n");	//ヘルマスでなければ
-		{
-			kirbyCopySav.copy(kirbyCopy);
-			helperCopySav.copy(helperCopy);
-			helperCondSav.copy(helperCond);
-			mutekiSav.copy(muteki);
 
-			initializeOffset();
-			//ウィリーに乗る処理
-			helperCondSav.cmp(eq, 0x0201);
-			{
-				Append("220BA31D 00000002\n");
-				Append("220BAB35 00000002\n");
-			}
-		}
-		end();
 
-		ifPress(L);
-		situation.cmp(eq, situation_play);
-		{
-			//タイマーリセット
-			timer.set(0xFFFFFFFF);	//ずれを考慮して
-
-			//体力全快
-			maxHp1.copy(hp1);
-			maxHp2.copy(hp2);
-			//残機99
-			life.set(99);
-
-			initializeOffset();
-			//メタゴーならPt最大
-			Append("9205B244 00FF0800\n");
-			{
-				metaPt.set(50);
-			}
-		}
-		end();
-
-		//musicConfigが1なら曲リセット
-		ifPress(L);
-		situation.cmp(eq, situation_play);
-		musicConfig.cmp(eq, 1);
-		{
-			music.set(music_reset);
-		}
-		end();
-
-		//musicConfigが2なら曲ミュート
-		musicConfig.cmp(eq, 2);
-		{
-			isMute.set(isMute_mute);
-		}
-		end();
-
-		//格闘王系なら(7～Aでメタゴーでなければ)
-		ifPress(L);
-		situation.cmp(eq, situation_play);
-		Append("8205B244 00FF0600\n");
-		Append("A205B244 00FF0800\n");
-		Append("7205B244 00FF0B00\n");
-		{
-			situation.set(5);	//次の戦闘へ
-			input.cmp(ne, 0, R);	//Rを押しながらじゃなければ
-			{
-				situation.set(6);	//再戦
-				arenaCntSav.copy(arenaCnt);
-			}
-		}
-		end();
-
-		//格闘王系でなければ(まだ通常時なら)
-		ifPress(L);
-		situation.cmp(eq, situation_play);
-		gamemode.cmp(eq, gamemode_mw);	//銀河なら
-		{
-			mwSelCopyUpdateBy1.set(1);
-			mwCopiesSav.copy(mwCopies);
-			mwSelCopySav.copy(mwSelCopy);
-		}
-		end();
-
-		ifPress(L);
-		situation.cmp(eq, situation_play);
-		{
-			//フロア・座標をロード
-			stageAndFloorSav.copy(stageAndFloor);
-			posSav.copy(setPos);
-			situation.set(situation_loadFloor);
-
-			//洞窟なら宝とボスをリセット
-			gamemode.cmp(eq, gamemode_gco);
-			{
-				Append("0206E100 00000000\n");
-				Append("0206E104 00000000\n");
-				Append("2206E112 00000000\n");
-				Append("2206E10E 00000000\n");
-			}
-		}
-		end();
 
 
 		//フロア遷移時の座標を保存
@@ -295,8 +307,8 @@ public class NdsCheatEditer{
 		input.copy(prevInput);
 	}
 
-	Var input;
-	Var prevInput;
+	public Var input;
+	public Var prevInput;
 	public void ifPress(uint n){
 		input.cmp(eq, 0, n);
 		prevInput.cmp(ne, 0, n);
