@@ -419,13 +419,17 @@ ram.getPos.eq(0);
 }
 end();
 
-//前回の場面が通常で、現在の場面が通常でもポーズでもなければ（つまりフロア遷移時なら・ロード中などに入った最初のフレームなら）
+//フロア遷移時などなら
 ram.situation.ne(ram.situation.play);
 ram.situation.ne(ram.situation.pause);
-data.prevSituation.eq(ram.situation.play);
 {
-	ram.invincibleCandyTimer.copy(data.invincibleCandyTimerInit);	//フロア遷移時の無敵キャンディの時間を保存
 	ram.timer.copy(data.displayTime);	//表示タイムの更新
+
+	//前回の場面が通常で、現在の場面が通常でもポーズでもなければ（ロード中などに入った最初のフレームなら）
+	data.prevSituation.eq(ram.situation.play);
+	{
+		ram.invincibleCandyTimer.copy(data.invincibleCandyTimerInit);	//フロア遷移時の無敵キャンディの時間を保存
+	}
 }
 end();
 
