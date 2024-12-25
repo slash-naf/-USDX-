@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>チート生成器</title>
+</head>
+<body>
+<script>
+
+//const toHex = (num, len)=> ('0'.repeat(len) + num.toString(16)).slice(-len);
+const toHex = (num, len)=> (num >>> 0).toString(16).padStart(len, "0").toUpperCase();
+
+const A		= 0x3FE;
+const B		= 0x3FD;
+const SELECT= 0x3FB;
+const START = 0x3F7;
+const Right = 0x3EF;
+const Left	= 0x3DF;
+const Up	= 0x3BF;
+const Down	= 0x37F;
+const R		= 0x2FF;
+const L		= 0x1FF;
+
+const error = [];
+const codes = [];
+let offset = 0;
+const end = _=>{
+	offset = 0;
+	codes.push("D2000000 00000000");
+}
+
+class Var{
+	constructor(name, addr, len, values){
+		this.name = name;
+		this.addr = addr;
+		this.len = len;
+		for(let key in values){
+			this[key] = values[key];
+		}
+	}
+
+	set(num){
+		if(offset != 0){
+			offset = 0;
+			codes.push("D3000000 00000000");
+		}
+
+		switch(this.len){
+		case 1:
+			codes.push("2"+ toHex(this.addr, 7) +" "+ toHex(num, 8));
+			break;
+		case 2:
+			codes.push("1"+ toHex(this.addr, 7) +" "+ toHex(num, 8));
+			break;
+		case 4:
+			codes.push("0"+ toHex(this.addr, 7) +" "+ toHex(num, 8));
+			break;
+		default:
+			const s = codes.length+": "+ this.name +".set("+ num +"); 長さが"+ this.len +"。1,2,4のどれかである必要がある。";
+			error.push(s);
+			codes.push(s);
+		}
+	}
+
+	copy(destination){
+		if(this.len != destination.len){
+			const s = codes.length+": "+ this.name +".copy("+ destination.name +"); 長さが違う。";
+			error.push(s);
+			codes.push(s);
+			return;
+		}
+
+		if(offset != this.addr){
+			offset = this.addr;
+			codes.push("D3000000 "+ toHex(this.addr, 8));
+		}
+
+		codes.push("F"+ toHex(destination.addr, 7) +" "+ toHex(this.len, 8));
+	}
+
+	lt(n, mask=0){
+		this.cmp(3, n, mask, "lt");
+	}
+	gt(n, mask=0){
+		this.cmp(4, n, mask, "gt");
+	}
+	eq(n, mask=0){
+		this.cmp(5, n, mask, "eq");
+	}
+	ne(n, mask=0){
+		this.cmp(6, n, mask, "ne");
+	}
+	cmp(ins, n, mask = 0, name = "cmp"){
+		if(this.len <= 2){ins += 4;}
+		ins = toHex(ins, 1);
+		switch(this.len){
+		case 1:
+			if(0 == this.addr % 2){
+				codes.push(ins + toHex(this.addr, 7) +" FF"+ toHex(mask, 2) +"00"+ toHex(n, 2));
+			}else{
+				codes.push(ins + toHex(this.addr-1, 7) +" "+ toHex(mask, 2) +"FF"+ toHex(n, 2) +"00");
+			}
+			break;
+		case 2:
+			codes.push(ins + toHex(this.addr, 7) +" "+ toHex(mask, 4) + toHex(n, 4));
+			break;
+		case 4:
+			codes.push(ins + toHex(this.addr, 7) +" "+ toHex(n, 8));
+			break;
+		default:
+			const s = codes.length+": "+ this.name +"."+ name +"("+ n +", 0x"+ toHex(mask, 2) +"); 長さが"+ this.len +"。1,2,4のどれかである必要がある。";
+			error.push(s);
+			codes.push(s);
+		}
+	}
+
+}
+
+const ram = {
+	input: [0x04000130, 2],
+
+	timerMoving:    [0x02041D5C, 1, {
+		t: 0,
+	}],
+	timer:          [0x02041D60, 4],
+
+	music:          [0x020485C4, 4, {
+		reset: 0xFFFFFC19,
+	}],
+
+	situation:      [0x0205B244, 1, {
+		play: 0,
+		loadFloor: 1,
+		arenaAdvance: 5,
+		arenaMatch: 6,
+		pause: 0xB,
+	}],
+	gamemode:       [0x0205B245, 1, {
+		SB: 0,
+		DB: 1,
+		gourmetRace: 2,
+		GCO: 3,
+		RotMK: 4,
+		MWW: 5,
+		RotK: 6,
+		arena: 7,
+		metaKnightmare: 8,
+		helperToHero: 9,
+		trueArena: 0xA,
+		beginnersRoom: 0xB,
+		likeArena(){
+			ram.gamemode.gt(this.RotK);
+			ram.gamemode.ne(this.metaKnightmare);
+			ram.gamemode.lt(this.beginnersRoom);
+		},
+	}],
+	stage:         [0x0205B246, 1],
+	floor:         [0x0205B247, 1],
+	stageAndFloor: [0x0205B246, 2],
+	motion:        [0x0205B248, 4],
+	setPos:        [0x0205B24C, 4],
+
+	score:  [0x0205B3C0, 4],
+	life: 	[0x0205B3C4, 1],
+	metaPt: [0x0205B3C5, 1],
+
+	muting: [0x0205E76C, 1, {
+		t: 0,
+	}],
+
+	gcoHasTreasures1: [0x0206E100, 4],
+	gcoHasTreasures2: [0x0206E104, 4],
+	gold:             [0x0206E108, 4],
+	treasuresCnt:     [0x0206E112, 1],
+	gcoHasBosses:     [0x0206E10E, 1],
+
+	arenaCnt:         [0x0206FC62, 1],
+
+	mwwCopies:        [0x02070A40, 4],
+	mwwSelCopy:       [0x02070A5C, 1],
+	mwwSelCopyLoadBy1:[0x02070A5E, 1],
+
+	getPos: [0x02076878, 4],
+
+	hp1:    [0x02076A94, 1],
+	maxHp1: [0x02076A96, 1],
+	hp2:    [0x02076CD8, 1],
+	maxHp2: [0x02076CDA, 1],
+
+	displayMode: [0x0209ECC4, 4, {
+		number: 0,
+	}],
+
+	kirbyCopy:            [0x020BA31B, 1],
+	wheelieRideBy2:       [0x020BA31D, 1],
+	invincibleCandyTimer: [0x020BA5CC, 2],
+	helperCopy:           [0x020BAB34, 4],
+	wheelieRodeBy2:       [0x020BAB35, 1],
+	helperCondition:           [0x020BAB38, 2],
+
+	menuPageIdx: [0x021983CA, 1],
+};
+const data = {
+	prevInput: 2,
+
+	arenaCntSav: 1,
+	stageAndFloorSav: 2,
+	posSav: 4,
+	posInit: 4,
+
+	kirbyCopySav: 1,
+	helperCopySav: 4,
+	helperConditionSav: 2,
+	invincibleCandyTimerSav: 2,
+	invincibleCandyTimerInit: 2,
+
+	prevSituation: 1,
+
+	displayTime: 4,
+
+	musicConfig: 1,
+
+	mwwCopiesSav: 4,
+	mwwSelCopySav: 1,
+
+	checkPoint: 4,
+
+	motionSav: 4,
+	motionInit: 4,
+};
+
+for(let key in ram){
+	let val = ram[key];
+	ram[key] = new Var("ram."+key, val[0], val[1], val[2]);
+}
+{
+	let cnt = 0;
+	for(let key in data){
+		if(4 === data[key]){
+			data[key] = new Var("data."+key, 0x023FE000 + cnt, 4);
+			cnt += 4;
+		}
+	}
+	for(let key in data){
+		if(2 === data[key]){
+			data[key] = new Var("data."+key, 0x023FE000 + cnt, 2);
+			cnt += 2;
+		}
+	}
+	for(let key in data){
+		let n = data[key];
+		if(Number.isInteger(n)){
+			data[key] = new Var("data."+key, 0x023FE000 + cnt, n);
+			cnt += n;
+		}
+	}
+}
+
+const ifPress = n =>{
+	ram.input.eq(0, n);
+	data.prevInput.ne(0, n);
+}
+
+
+
+
+
+
+
+
+
+ifPress(L);
+data.checkPoint.set(1);
+{
+	//ポーズ中にLでセーブ
+	ram.situation.eq(ram.situation.pause);
+	{
+		ram.arenaCnt.copy(data.arenaCntSav);
+		ram.stageAndFloor.copy(data.stageAndFloorSav);
+		data.posInit.copy(data.posSav);
+		data.motionInit.copy(data.motionSav);
+
+		ram.input.ne(0, R);	//Rを押しながらじゃなければ
+		{
+			ram.kirbyCopy.copy(data.kirbyCopySav);
+			ram.helperCopy.copy(data.helperCopySav);
+			ram.helperCondition.copy(data.helperConditionSav);
+			data.invincibleCandyTimerInit.copy(data.invincibleCandyTimerSav)
+
+			ram.mwwCopies.copy(data.mwwCopiesSav);
+			ram.mwwSelCopy.copy(data.mwwSelCopySav);
+		}
+	}
+	end();
+	data.checkPoint.eq(1);
+
+	//通常時ににLでロード
+	ram.situation.eq(ram.situation.play);
+	data.checkPoint.set(2);
+	{
+		//タイマーリセット
+		ram.timer.set(-1);	//ずれを考慮して-1にすることで0から始まるように
+
+		ram.life.set(99);
+		ram.maxHp1.copy(ram.hp1);
+		ram.maxHp2.copy(ram.hp2);
+
+		//ヘルマスでなければ能力面のロード
+		ram.gamemode.ne(ram.gamemode.helperToHero);
+		{
+			data.kirbyCopySav.copy(ram.kirbyCopy);
+			data.helperCopySav.copy(ram.helperCopy);
+			data.helperConditionSav.copy(ram.helperCondition);
+			data.invincibleCandyTimerSav.copy(ram.invincibleCandyTimer);
+
+			//ウィリーに乗る処理
+			data.helperConditionSav.eq(0x0201);
+			{
+				ram.wheelieRideBy2.set(2);
+				ram.wheelieRodeBy2.set(2);
+			}
+		}
+		end();
+		data.checkPoint.eq(2);
+
+		//メタゴーならPt最大
+		ram.gamemode.eq(ram.gamemode.metaKnightmare);
+		{
+			ram.metaPt.set(50);
+		}
+		end();
+		data.checkPoint.eq(2);
+
+		//musicConfigが1なら曲リセット
+		data.musicConfig.eq(1);
+		{
+			ram.music.set(ram.music.reset);
+		}
+		end();
+		//2なら曲ミュート(分かりやすいようにここに書いてるけどL押さなくても実行される)
+		data.musicConfig.eq(2);
+		{
+			ram.muting.set(ram.muting.t);
+		}
+		end();
+		data.checkPoint.eq(2);
+
+		//格闘王系なら
+		ram.gamemode.likeArena();
+		{
+			data.checkPoint.set(0);	//breakみたいな
+
+			ram.situation.set(ram.situation.arenaAdvance);	//次の戦闘へ
+
+			ram.input.ne(0, R);	//Rを押しながらじゃなければ
+			{
+				ram.situation.set(ram.situation.arenaMatch);	//戦闘開始
+				data.arenaCntSav.copy(ram.arenaCnt);
+
+				//タイマーが止まっていればずれは起こらないから0にしてタイマーリセット
+				ram.timerMoving.ne(ram.timerMoving.t);
+				{
+					ram.timer.set(0);
+				}
+			}
+		}
+		end();
+		data.checkPoint.eq(2);
+
+		//フロア・座標をロード
+		ram.situation.set(ram.situation.loadFloor);
+		data.stageAndFloorSav.copy(ram.stageAndFloor);
+		data.posSav.copy(ram.setPos);
+		data.motionSav.copy(ram.motion);
+
+		//銀河なら
+		ram.gamemode.eq(ram.gamemode.MWW);
+		{
+			ram.mwwSelCopyLoadBy1.set(1);
+			data.mwwCopiesSav.copy(ram.mwwCopies);
+			data.mwwSelCopySav.copy(ram.mwwSelCopy);
+		}
+		end();
+		data.checkPoint.eq(2);
+
+		ram.gamemode.eq(ram.gamemode.GCO);
+		{
+			ram.gcoHasTreasures1.set(0);
+			ram.gcoHasTreasures2.set(0);
+			ram.treasuresCnt.set(0);
+			ram.gcoHasBosses.set(0);
+		}
+		end();
+	}
+}
+data.checkPoint.set(0);
+
+//ポーズ中に上入力で曲の設定
+ram.situation.eq(ram.situation.pause);
+ifPress(Up);
+{
+	ram.menuPageIdx.copy(data.musicConfig);
+}
+end();
+
+//フロア遷移時の座標を保存
+data.posInit.eq(0);
+{
+	ram.getPos.copy(data.posInit);	//開始時の座標の保存
+	ram.motion.copy(data.motionInit);//開始時のモーションの保存
+}
+end();
+ram.getPos.eq(0);
+{
+	data.posInit.set(0);
+}
+end();
+
+//前回の場面が通常で、現在の場面が通常でもポーズでもなければ（つまりフロア遷移時なら・ロード中などに入った最初のフレームなら）
+ram.situation.ne(ram.situation.play);
+ram.situation.ne(ram.situation.pause);
+data.prevSituation.eq(ram.situation.play);
+{
+	ram.invincibleCandyTimer.copy(data.invincibleCandyTimerInit);	//フロア遷移時の無敵キャンディの時間を保存
+	ram.timer.copy(data.displayTime);	//表示タイムの更新
+}
+end();
+
+//タイマーが表示されるゲームモードなら
+ram.gamemode.lt(7);
+{
+	ram.displayMode.set(ram.displayMode.number);	//ボス戦でもスコア・ゴールドが常に表示されるようにする
+	data.displayTime.copy(ram.score);	//スコアに表示
+
+	//洞窟ならゴールドに表示
+	ram.gamemode.eq(ram.gamemode.GCO);
+	{
+		data.displayTime.copy(ram.gold);
+	}
+}
+end();
+	
+//R+startで、本来ポーズできない所でもポーズ
+ram.input.eq(0, R);
+ifPress(START);
+{
+	ram.situation.set(ram.situation.pause);
+}
+end();
+
+
+ram.situation.copy(data.prevSituation);
+ram.input.copy(data.prevInput);
+
+
+console.log(codes.join("\n"));
+console.log(error.join("\n"));
+
+
+
+</script>
+</body>
+</html>
