@@ -41,6 +41,8 @@ public class NdsCheatEditer{
 
 		Var stageAndFloor = memory(0x0205B246, 2);
 
+		Var motion = memory(0x0205B248, 4);
+
 		Var setPos = memory(0x0205B24C, 4);
 
 		Var score = memory(0x0205B3C0, 4);
@@ -106,6 +108,9 @@ public class NdsCheatEditer{
 
 		Var checkPoint = memory(4);
 
+		Var motionSav = memory(4);
+		Var motionInit = memory(4);
+
 
 		ifPress(L);
 		checkPoint.set(1);	//addCheckPoint
@@ -116,6 +121,7 @@ public class NdsCheatEditer{
 				arenaCnt.copy(arenaCntSav);
 				stageAndFloor.copy(stageAndFloorSav);
 				posInit.copy(posSav);
+				motionInit.copy(motionSav);
 
 				input.cmp(ne, 0, R);	//Rを押しながらじゃなければ
 				{
@@ -213,6 +219,7 @@ public class NdsCheatEditer{
 				situation.set(situation_loadFloor);
 				stageAndFloorSav.copy(stageAndFloor);
 				posSav.copy(setPos);
+				motionSav.copy(motion);
 
 				gamemode.cmp(eq, gamemode_mw);	//銀河なら
 				{
@@ -256,6 +263,7 @@ public class NdsCheatEditer{
 		posInit.cmp(eq, 0);
 		{
 			getPos.copy(posInit);
+			motion.copy(motionInit);
 		}
 		end();
 		getPos.cmp(eq, 0);
