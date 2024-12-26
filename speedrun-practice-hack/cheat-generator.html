@@ -39,6 +39,9 @@ class Var{
 			this[key] = values[key];
 		}
 	}
+	at(i, len){
+		return new Var(this.name +".at("+ i +", "+ len +")", this.addr + i, len);
+	}
 
 	set(num){
 		if(offset != 0){
@@ -192,12 +195,10 @@ const ram = {
 		number: 0,
 	}],
 
-	kirbyCopy:            [0x020BA31B, 1],
-	wheelieRideBy2:       [0x020BA31D, 1],
+	kirbyCondition:            [0x020BA318, 8],
 	invincibleCandyTimer: [0x020BA5CC, 2],
-	helperCopy:           [0x020BAB34, 4],
+	helperCondition:           [0x020BAB34, 8],
 	wheelieRodeBy2:       [0x020BAB35, 1],
-	helperCondition:           [0x020BAB38, 2],
 
 	menuPageIdx: [0x021983CA, 1],
 };
@@ -209,9 +210,8 @@ const data = {
 	posSav: 4,
 	posInit: 4,
 
-	kirbyCopySav: 1,
-	helperCopySav: 4,
-	helperConditionSav: 2,
+	kirbyConditionSav: 8,
+	helperConditionSav: 8,
 	invincibleCandyTimerSav: 2,
 	invincibleCandyTimerInit: 2,
 
@@ -237,15 +237,17 @@ for(let key in ram){
 {
 	let cnt = 0;
 	for(let key in data){
-		if(4 === data[key]){
-			data[key] = new Var("data."+key, 0x023FE000 + cnt, 4);
-			cnt += 4;
+		let n = data[key];
+		if(0 === data[key] % 4){
+			data[key] = new Var("data."+key, 0x023FE000 + cnt, n);
+			cnt += n;
 		}
 	}
 	for(let key in data){
-		if(2 === data[key]){
-			data[key] = new Var("data."+key, 0x023FE000 + cnt, 2);
-			cnt += 2;
+		let n = data[key];
+		if(0 === data[key] % 2){
+			data[key] = new Var("data."+key, 0x023FE000 + cnt, n);
+			cnt += n;
 		}
 	}
 	for(let key in data){
@@ -283,8 +285,7 @@ data.checkPoint.set(1);
 
 		ram.input.ne(0, R);	//Rを押しながらじゃなければ
 		{
-			ram.kirbyCopy.copy(data.kirbyCopySav);
-			ram.helperCopy.copy(data.helperCopySav);
+			ram.kirbyCondition.copy(data.kirbyConditionSav);
 			ram.helperCondition.copy(data.helperConditionSav);
 			data.invincibleCandyTimerInit.copy(data.invincibleCandyTimerSav)
 
@@ -317,15 +318,13 @@ data.checkPoint.set(1);
 		//ヘルマスでなければ能力面のロード
 		ram.gamemode.ne(ram.gamemode.helperToHero);
 		{
-			data.kirbyCopySav.copy(ram.kirbyCopy);
-			data.helperCopySav.copy(ram.helperCopy);
+			data.kirbyConditionSav.copy(ram.kirbyCondition);
 			data.helperConditionSav.copy(ram.helperCondition);
 			data.invincibleCandyTimerSav.copy(ram.invincibleCandyTimer);
 
 			//ウィリーに乗る処理
-			data.helperConditionSav.eq(0x0201);
+			data.helperConditionSav.at(4, 2).eq(0x0201);
 			{
-				ram.wheelieRideBy2.set(2);
 				ram.wheelieRodeBy2.set(2);
 			}
 		}
