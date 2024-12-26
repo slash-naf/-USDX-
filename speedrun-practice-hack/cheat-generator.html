@@ -241,6 +241,9 @@ const data = {
 	shouldLoadSeed: 1,
 
 	quickLoading: 1,
+
+	prevSeed: 2,
+	shouldUpdateTimeBySeed: 1,
 };
 
 for(let key in ram){
@@ -497,6 +500,45 @@ ifPress(Down);
 end();
 
 
+
+
+
+
+
+
+
+
+//ポーズ中にSELECTで乱数の偶奇が切り替わったら表示タイム更新するかの設定
+ram.situation.eq(ram.situation.pause);
+ifPress(SELECT);
+{
+	ram.menuPageIdx.copy(data.shouldUpdateTimeBySeed);
+}
+end();
+//乱数の偶奇が切り替わったら表示タイム更新
+data.shouldUpdateTimeBySeed.eq(0);
+data.prevSeed.eq(0, 0xFFE);
+ram.seed.ne(0, 0xFFE);
+{
+	ram.timer.copy(data.displayTime);	//表示タイムの更新
+}
+end();
+data.shouldUpdateTimeBySeed.eq(0);
+data.prevSeed.ne(0, 0xFFE);
+ram.seed.eq(0, 0xFFE);
+{
+	ram.timer.copy(data.displayTime);	//表示タイムの更新
+}
+end();
+
+
+
+
+
+
+
+
+
 //タイマーが表示されるゲームモードなら
 ram.gamemode.lt(7);
 {
@@ -529,6 +571,8 @@ ifPress(SELECT);
 end();
 
 
+
+ram.seed.copy(data.prevSeed);
 ram.situation.copy(data.prevSituation);
 ram.input.copy(data.prevInput);
 
