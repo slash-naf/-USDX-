@@ -237,6 +237,7 @@ const data = {
 
 	seedSav: 2,
 	seedInit: 2,
+	shouldLoadSeed: 1,
 };
 
 for(let key in ram){
@@ -340,7 +341,13 @@ data.checkPoint.set(1);
 		ram.maxHp1.copy(ram.hp1);
 		ram.maxHp2.copy(ram.hp2);
 
-		data.seedSav.copy(ram.seed);
+		//shouldLoadSeedが0ならロード
+		data.shouldLoadSeed.eq(0);
+		{
+			data.seedSav.copy(ram.seed);
+		}
+		end();
+		data.checkPoint.eq(2);
 
 		//ヘルマスでなければ能力面のロード
 		ram.gamemode.ne(ram.gamemode.helperToHero);
@@ -460,6 +467,14 @@ ram.situation.eq(ram.situation.pause);
 ifPress(Up);
 {
 	ram.menuPageIdx.copy(data.musicConfig);
+}
+end();
+
+//ポーズ中に下入力で乱数をロードするかの設定
+ram.situation.eq(ram.situation.pause);
+ifPress(Down);
+{
+	ram.menuPageIdx.copy(data.shouldLoadSeed);
 }
 end();
 
