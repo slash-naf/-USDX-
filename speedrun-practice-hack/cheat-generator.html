@@ -430,23 +430,22 @@ data.checkPoint.set(0);
 
 
 //フロア遷移完了時に(乱数が止まっているときに)乱数のセーブ・ロード
-data.quickLoading.eq(0);	//QL中じゃなければ
-ram.situation.eq(ram.situation.play);
-data.prevSituation.ne(ram.situation.play);
-{
-	ram.seed.copy(data.seedInit);	//乱数を保存
-}
-end();
-//shouldLoadSeedが0ならロード
 data.quickLoading.eq(1);	//QL中なら
 ram.situation.eq(ram.situation.play);
 {
 	data.quickLoading.set(0);
 
+	//shouldLoadSeedが0ならロード
 	data.shouldLoadSeed.eq(0);
 	{
 		data.seedSav.copy(ram.seed);
 	}
+}
+end();
+ram.situation.eq(ram.situation.play);
+data.prevSituation.ne(ram.situation.play);
+{
+	ram.seed.copy(data.seedInit);	//乱数を保存
 }
 end();
 
