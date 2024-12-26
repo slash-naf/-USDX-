@@ -123,6 +123,8 @@ class Var{
 const ram = {
 	input: [0x04000130, 2],
 
+	seed:  [0x02041D3C, 2],
+
 	timerMoving:    [0x02041D5C, 1, {
 		t: 0,
 	}],
@@ -232,6 +234,9 @@ const data = {
 
 	motionSav: 4,
 	motionInit: 4,
+
+	seedSav: 2,
+	seedInit: 2,
 };
 
 for(let key in ram){
@@ -290,7 +295,9 @@ end();
 
 //タイマーが-1のままなら0にする
 ram.timer.eq(-1);
+{
 	ram.timer.set(0);
+}
 end();
 
 ifPress(L);
@@ -304,11 +311,13 @@ data.checkPoint.set(1);
 		data.posInit.copy(data.posSav);
 		data.motionInit.copy(data.motionSav);
 
+		data.seedInit.copy(data.seedSav);
+
 		ram.input.ne(0, R);	//Rを押しながらじゃなければ
 		{
 			ram.kirbyCondition.copy(data.kirbyConditionSav);
 			ram.helperCondition.copy(data.helperConditionSav);
-			data.invincibleCandyTimerInit.copy(data.invincibleCandyTimerSav)
+			data.invincibleCandyTimerInit.copy(data.invincibleCandyTimerSav);
 
 			ram.mwwCopies.copy(data.mwwCopiesSav);
 			ram.mwwSelCopy.copy(data.mwwSelCopySav);
@@ -324,9 +333,14 @@ data.checkPoint.set(1);
 		//タイマーリセット
 		ram.timer.set(-1);	//タイマーが動いてるとこのあと1進むのを考慮して-1にする
 
+		//残機99
 		ram.life.set(99);
+
+		//HP全回復
 		ram.maxHp1.copy(ram.hp1);
 		ram.maxHp2.copy(ram.hp2);
+
+		data.seedSav.copy(ram.seed);
 
 		//ヘルマスでなければ能力面のロード
 		ram.gamemode.ne(ram.gamemode.helperToHero);
@@ -422,6 +436,7 @@ ram.situation.ne(ram.situation.pause);
 	data.prevSituation.eq(ram.situation.play);
 	{
 		ram.invincibleCandyTimer.copy(data.invincibleCandyTimerInit);	//フロア遷移時の無敵キャンディの時間を保存
+		ram.seed.copy(data.seedInit);	//フロア遷移時の乱数を保存
 	}
 }
 end();
