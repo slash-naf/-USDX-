@@ -391,24 +391,17 @@ data.checkPoint.set(1);
 }
 data.checkPoint.set(0);
 
-//ポーズ中に上入力で曲の設定
-ram.situation.eq(ram.situation.pause);
-ifPress(Up);
+//タイマーが表示されるゲームモードなら
+ram.gamemode.lt(7);
 {
-	ram.menuPageIdx.copy(data.musicConfig);
-}
-end();
+	ram.displayMode.set(ram.displayMode.number);	//ボス戦でもスコア・ゴールドが常に表示されるようにする
+	data.displayTime.copy(ram.score);	//スコアに表示
 
-//フロア遷移時の座標を保存
-data.posInit.eq(0);
-{
-	ram.getPos.copy(data.posInit);	//開始時の座標の保存
-	ram.motion.copy(data.motionInit);//開始時のモーションの保存
-}
-end();
-ram.getPos.eq(0);
-{
-	data.posInit.set(0);
+	//洞窟ならゴールドに表示
+	ram.gamemode.eq(ram.gamemode.GCO);
+	{
+		data.displayTime.copy(ram.gold);
+	}
 }
 end();
 
@@ -426,20 +419,28 @@ ram.situation.ne(ram.situation.pause);
 }
 end();
 
-//タイマーが表示されるゲームモードなら
-ram.gamemode.lt(7);
+//フロア遷移時の座標を保存
+data.posInit.eq(0);
 {
-	ram.displayMode.set(ram.displayMode.number);	//ボス戦でもスコア・ゴールドが常に表示されるようにする
-	data.displayTime.copy(ram.score);	//スコアに表示
-
-	//洞窟ならゴールドに表示
-	ram.gamemode.eq(ram.gamemode.GCO);
-	{
-		data.displayTime.copy(ram.gold);
-	}
+	ram.getPos.copy(data.posInit);	//開始時の座標の保存
+	ram.motion.copy(data.motionInit);//開始時のモーションの保存
 }
 end();
-	
+ram.getPos.eq(0);
+{
+	data.posInit.set(0);
+}
+end();
+
+
+//ポーズ中に上入力で曲の設定
+ram.situation.eq(ram.situation.pause);
+ifPress(Up);
+{
+	ram.menuPageIdx.copy(data.musicConfig);
+}
+end();
+
 //R+startで、本来ポーズできない所でもポーズ
 ram.input.eq(0, R);
 ifPress(START);
