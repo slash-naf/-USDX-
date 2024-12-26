@@ -174,6 +174,8 @@ const ram = {
 		t: 0,
 	}],
 
+	dbSwitches: [0x0206BDEA, 1],
+
 	gcoHasTreasures1: [0x0206E100, 4],
 	gcoHasTreasures2: [0x0206E104, 4],
 	gold:             [0x0206E108, 4],
@@ -271,6 +273,20 @@ const ifPress = n =>{
 
 //キャンディや1upなどの復活しないアイテムを復活させる
 ram.consumedItem.set(0);
+
+//ダイナのスイッチがステージに入ってるときはあってステージ選択画面ではおためし部屋があるようにする
+ram.gamemode.eq(ram.gamemode.DB);
+{
+	ram.dbSwitches.set(0);
+
+	ram.situation.gt(1);	//通常時でなくフロアロード時でなければ
+	//ram.situation.ne(ram.situation.play);
+	//ram.situation.ne(ram.situation.loadFloor);
+	{
+		ram.dbSwitches.set(3);
+	}
+}
+end();
 
 //タイマーが-1のままなら0にする
 ram.timer.eq(-1);
@@ -372,7 +388,7 @@ data.checkPoint.set(1);
 		data.posSav.copy(ram.setPos);
 		data.motionSav.copy(ram.motion);
 
-		//銀河なら
+		//銀河なら取得したコピーとその選択位置をロード
 		ram.gamemode.eq(ram.gamemode.MWW);
 		{
 			ram.mwwSelCopyLoadBy1.set(1);
@@ -382,6 +398,7 @@ data.checkPoint.set(1);
 		end();
 		data.checkPoint.eq(2);
 
+		//洞窟なら宝とボスをリセット
 		ram.gamemode.eq(ram.gamemode.GCO);
 		{
 			ram.gcoHasTreasures1.set(0);
