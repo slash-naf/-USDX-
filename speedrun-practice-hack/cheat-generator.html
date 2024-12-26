@@ -269,8 +269,10 @@ const ifPress = n =>{
 
 
 
-
-
+//タイマーが-1のままなら0にする
+ram.timer.eq(-1);
+	ram.timer.set(0);
+end();
 
 ifPress(L);
 data.checkPoint.set(1);
@@ -301,15 +303,7 @@ data.checkPoint.set(1);
 	data.checkPoint.set(2);
 	{
 		//タイマーリセット
-		ram.timer.set(-1);	//ずれを考慮して-1にすることで0から始まるように
-
-		//タイマーが止まっていればずれは起こらないから0にする
-		ram.timerMoving.ne(ram.timerMoving.t);
-		{
-			ram.timer.set(0);
-		}
-		end();
-		data.checkPoint.eq(2);
+		ram.timer.set(-1);	//タイマーが動いてるとこのあと1進むのを考慮して-1にする
 
 		ram.life.set(99);
 		ram.maxHp1.copy(ram.hp1);
