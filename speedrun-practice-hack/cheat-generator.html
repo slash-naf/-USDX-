@@ -164,6 +164,8 @@ const ram = {
 	motion:        [0x0205B248, 4],
 	setPos:        [0x0205B24C, 4],
 
+	consumedItem:  [0x0205B270, 4],
+
 	score:  [0x0205B3C0, 4],
 	life: 	[0x0205B3C4, 1],
 	metaPt: [0x0205B3C5, 1],
@@ -267,7 +269,8 @@ const ifPress = n =>{
 
 
 
-
+//キャンディや1upなどの復活しないアイテムを復活させる
+ram.consumedItem.set(0);
 
 //タイマーが-1のままなら0にする
 ram.timer.eq(-1);
@@ -391,19 +394,6 @@ data.checkPoint.set(1);
 }
 data.checkPoint.set(0);
 
-//タイマーが表示されるゲームモードなら
-ram.gamemode.lt(7);
-{
-	ram.displayMode.set(ram.displayMode.number);	//ボス戦でもスコア・ゴールドが常に表示されるようにする
-	data.displayTime.copy(ram.score);	//スコアに表示
-
-	//洞窟ならゴールドに表示
-	ram.gamemode.eq(ram.gamemode.GCO);
-	{
-		data.displayTime.copy(ram.gold);
-	}
-}
-end();
 
 //フロア遷移時などなら
 ram.situation.ne(ram.situation.play);
@@ -446,6 +436,21 @@ ram.input.eq(0, R);
 ifPress(START);
 {
 	ram.situation.set(ram.situation.pause);
+}
+end();
+
+
+//タイマーが表示されるゲームモードなら
+ram.gamemode.lt(7);
+{
+	ram.displayMode.set(ram.displayMode.number);	//ボス戦でもスコア・ゴールドが常に表示されるようにする
+	data.displayTime.copy(ram.score);	//スコアに表示
+
+	//洞窟ならゴールドに表示
+	ram.gamemode.eq(ram.gamemode.GCO);
+	{
+		data.displayTime.copy(ram.gold);
+	}
 }
 end();
 
