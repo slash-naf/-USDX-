@@ -137,6 +137,7 @@ const ram = {
 	situation:      [0x0205B244, 1, {
 		play: 0,
 		loadFloor: 1,
+		die: 4,
 		arenaAdvance: 5,
 		arenaMatch: 6,
 		pause: 0xB,
@@ -495,14 +496,6 @@ ifPress(Down);
 }
 end();
 
-//R+startで、本来ポーズできない所でもポーズ
-ram.input.eq(0, R);
-ifPress(START);
-{
-	ram.situation.set(ram.situation.pause);
-}
-end();
-
 
 //タイマーが表示されるゲームモードなら
 ram.gamemode.lt(7);
@@ -515,6 +508,23 @@ ram.gamemode.lt(7);
 	{
 		data.displayTime.copy(ram.gold);
 	}
+}
+end();
+
+
+//R+startで、本来ポーズできない所でもポーズ
+ram.input.eq(0, R);
+ifPress(START);
+{
+	ram.situation.set(ram.situation.pause);
+}
+end();
+
+//R+selectで、死亡
+ram.input.eq(0, R);
+ifPress(SELECT);
+{
+	ram.situation.set(ram.situation.die);
 }
 end();
 
