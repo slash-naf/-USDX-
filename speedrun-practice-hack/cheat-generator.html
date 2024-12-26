@@ -238,6 +238,8 @@ const data = {
 	seedSav: 2,
 	seedInit: 2,
 	shouldLoadSeed: 1,
+
+	quickLoading: 1,
 };
 
 for(let key in ram){
@@ -331,6 +333,8 @@ data.checkPoint.set(1);
 	ram.situation.eq(ram.situation.play);
 	data.checkPoint.set(2);
 	{
+		data.quickLoading.set(1);
+
 		//タイマーリセット
 		ram.timer.set(-1);	//タイマーが動いてるとこのあと1進むのを考慮して-1にする
 
@@ -340,14 +344,6 @@ data.checkPoint.set(1);
 		//HP全回復
 		ram.maxHp1.copy(ram.hp1);
 		ram.maxHp2.copy(ram.hp2);
-
-		//shouldLoadSeedが0ならロード
-		data.shouldLoadSeed.eq(0);
-		{
-			data.seedSav.copy(ram.seed);
-		}
-		end();
-		data.checkPoint.eq(2);
 
 		//ヘルマスでなければ能力面のロード
 		ram.gamemode.ne(ram.gamemode.helperToHero);
@@ -433,6 +429,29 @@ data.checkPoint.set(1);
 data.checkPoint.set(0);
 
 
+//フロア遷移完了時に(乱数が止まっているときに)乱数のセーブ・ロード
+data.quickLoading.eq(0);	//QL中じゃなければ
+ram.situation.eq(ram.situation.play);
+data.prevSituation.ne(ram.situation.play);
+{
+	ram.seed.copy(data.seedInit);	//乱数を保存
+}
+end();
+//shouldLoadSeedが0ならロード
+data.quickLoading.eq(1);	//QL中なら
+ram.situation.eq(ram.situation.play);
+{
+	data.quickLoading.set(0);
+
+	data.shouldLoadSeed.eq(0);
+	{
+		data.seedSav.copy(ram.seed);
+	}
+}
+end();
+
+
+
 //フロア遷移時などなら
 ram.situation.ne(ram.situation.play);
 ram.situation.ne(ram.situation.pause);
@@ -443,7 +462,6 @@ ram.situation.ne(ram.situation.pause);
 	data.prevSituation.eq(ram.situation.play);
 	{
 		ram.invincibleCandyTimer.copy(data.invincibleCandyTimerInit);	//フロア遷移時の無敵キャンディの時間を保存
-		ram.seed.copy(data.seedInit);	//フロア遷移時の乱数を保存
 	}
 }
 end();
