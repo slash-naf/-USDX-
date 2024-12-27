@@ -8,7 +8,6 @@
 <body>
 <script>
 
-//const toHex = (num, len)=> ('0'.repeat(len) + num.toString(16)).slice(-len);
 const toHex = (num, len)=> (num >>> 0).toString(16).padStart(len, "0").toUpperCase();
 
 const A		= 0x3FE;
@@ -293,7 +292,7 @@ ram.consumedItem.set(0);
 
 
 
-title("Restore Switches in Dyna Blade");
+title("Restore Switches in DB");
 
 //ダイナのスイッチがステージに入ってるときはあってステージ選択画面ではおためし部屋があるようにする
 ram.gamemode.eq(ram.gamemode.DB);
@@ -540,7 +539,7 @@ end();
 
 
 
-title("RNG Sync Timer");
+title("RNG Parity Sync Timer");
 
 //乱数の偶奇が切り替わったら表示タイム更新
 data.shouldUpdateTimeBySeed.eq(0);
@@ -565,7 +564,7 @@ end();
 
 
 
-title("Display Time on Score or Gold");
+title("Time on Score or Gold");
 
 //タイマーが表示されるゲームモードなら
 ram.gamemode.lt(7);
@@ -582,7 +581,7 @@ ram.gamemode.lt(7);
 end();
 
 
-title("Hold R and Press START to Pause Anytime");
+title("Hold R + START to Pause Anytime");
 
 //R+startで、本来ポーズできない所でもポーズ
 ram.input.eq(0, R);
@@ -593,7 +592,7 @@ ifPress(START);
 end();
 
 
-title("Hold R and Press SELECT to Die");
+title("Hold R + SELECT to Die");
 
 //R+selectで、死亡
 ram.input.eq(0, R);
@@ -619,11 +618,11 @@ ram.input.copy(data.prevInput);
 
 
 //出力
-//console.log(codes.join("\n"));
-//console.log(error.join("\n"));
+console.log(codes.join("\n"));
+console.log(error.join("\n"));
 
 
-
+/*
 //dataのメモリアドレス出力
 let dataInfos = [];
 for(let key in data){
@@ -634,7 +633,7 @@ for(let key in data){
 dataInfos.sort((a, b) => a[1] - b[1]);
 
 console.log(dataInfos.map(x => x[0] +"\t0x"+ toHex(x[1], 8) +"\t"+ x[2]).join("\n"));
-
+*/
 
 
 </script>
