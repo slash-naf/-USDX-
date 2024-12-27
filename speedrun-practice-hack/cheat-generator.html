@@ -619,8 +619,21 @@ ram.input.copy(data.prevInput);
 
 
 //出力
-console.log(codes.join("\n"));
-console.log(error.join("\n"));
+//console.log(codes.join("\n"));
+//console.log(error.join("\n"));
+
+
+
+//dataのメモリアドレス出力
+let dataInfos = [];
+for(let key in data){
+	let x = data[key];
+	dataInfos.push([key, x.addr, x.len]);
+	//dataInfos.push(key +"\t0x"+ toHex(x.addr, 8) +"\t"+ x.len)
+}
+dataInfos.sort((a, b) => a[1] - b[1]);
+
+console.log(dataInfos.map(x => x[0] +"\t0x"+ toHex(x[1], 8) +"\t"+ x[2]).join("\n"));
 
 
 
