@@ -282,9 +282,18 @@ const ifPress = n =>{
 
 
 
+let title = s => codes.push("");
+title = s => codes.push("\n["+ s +"]");
+
+
+title("Restore Items");
 
 //キャンディや1upなどの復活しないアイテムを復活させる
 ram.consumedItem.set(0);
+
+
+
+title("Restore Switches in Dyna Blade");
 
 //ダイナのスイッチがステージに入ってるときはあってステージ選択画面ではおためし部屋があるようにする
 ram.gamemode.eq(ram.gamemode.DB);
@@ -299,6 +308,12 @@ ram.gamemode.eq(ram.gamemode.DB);
 	}
 }
 end();
+
+
+
+
+
+title("QSQL");
 
 //タイマーが-1のままなら0にする
 ram.timer.eq(-1);
@@ -483,6 +498,9 @@ ram.getPos.eq(0);
 end();
 
 
+
+title("Settings");
+
 //ポーズ中に上入力で曲の設定
 ram.situation.eq(ram.situation.pause);
 ifPress(Up);
@@ -515,6 +533,15 @@ ifPress(SELECT);
 	ram.menuPageIdx.copy(data.shouldUpdateTimeBySeed);
 }
 end();
+
+
+
+
+
+
+
+title("RNG Sync Timer");
+
 //乱数の偶奇が切り替わったら表示タイム更新
 data.shouldUpdateTimeBySeed.eq(0);
 data.prevSeed.eq(0, 0xFFE);
@@ -538,6 +565,7 @@ end();
 
 
 
+title("Display Time on Score or Gold");
 
 //タイマーが表示されるゲームモードなら
 ram.gamemode.lt(7);
@@ -554,6 +582,8 @@ ram.gamemode.lt(7);
 end();
 
 
+title("Hold R and Press START to Pause Anytime");
+
 //R+startで、本来ポーズできない所でもポーズ
 ram.input.eq(0, R);
 ifPress(START);
@@ -561,6 +591,9 @@ ifPress(START);
 	ram.situation.set(ram.situation.pause);
 }
 end();
+
+
+title("Hold R and Press SELECT to Die");
 
 //R+selectで、死亡
 ram.input.eq(0, R);
@@ -571,6 +604,10 @@ ifPress(SELECT);
 end();
 
 
+
+
+
+title("Prepare for Next Routine");
 
 ram.seed.copy(data.prevSeed);
 ram.situation.copy(data.prevSituation);
